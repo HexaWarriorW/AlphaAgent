@@ -88,9 +88,9 @@ class LocalEnv(Env[LocalConf]):
     """
 
     def prepare(self):
-        if not (Path("~/.qlib/qlib_data/cn_data").expanduser().resolve().exists()):
+        if not (Path("/media/arthurthomas/CN300/quant/qlib_data/cn_data").expanduser().resolve().exists()):
             self.run(
-                entry="python -m qlib.run.get_data qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn",
+                entry="python -m qlib.run.get_data qlib_data --target_dir /media/arthurthomas/CN300/quant/qlib_data/cn_data --region cn",
             )
         else:
             print("Data already exists. Download skipped.")
@@ -129,7 +129,7 @@ class QlibLocalEnv(LocalEnv):
         """确保本地环境已准备就绪"""
         logger.info("Use local environment to run Qlib backtest")
         # 确保Qlib数据目录存在
-        qlib_data_path = Path("~/.qlib/qlib_data/cn_data").expanduser()
+        qlib_data_path = Path("/media/arthurthomas/CN300/quant/qlib_data/cn_data").expanduser()
         if not qlib_data_path.exists():
             logger.warning(f"Qlib数据目录不存在: {qlib_data_path}，请确保已下载数据")
         
@@ -222,7 +222,7 @@ class QlibDockerConf(DockerConf):
     image: str = "local_qlib:latest"
     mount_path: str = "/workspace/qlib_workspace/"
     default_entry: str = "qrun conf.yaml"
-    extra_volumes: dict = {Path("~/.qlib/").expanduser().resolve(): "/root/.qlib/"}
+    extra_volumes: dict = {Path("/media/arthurthomas/CN300/quant/").expanduser().resolve(): "/root/.qlib/"}
     shm_size: str | None = "16g"
     enable_gpu: bool = True
 

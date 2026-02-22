@@ -64,21 +64,21 @@ This repository follows the implementation of [RD-Agent](https://github.com/micr
   # Convert csv to Qlib format. Check correct paths before runing. 
   python scripts/dump_bin.py dump_all ... \
   --include_fields open,high,low,close,preclose,volume,amount,turn,factor \
-  --csv_path  ~/.qlib/qlib_data/cn_data/raw_data_now \
-  --qlib_dir ~/.qlib/qlib_data/cn_data \
+  --csv_path  /media/arthurthomas/CN300/quant/qlib_data/cn_data/raw_data_now \
+  --qlib_dir /media/arthurthomas/CN300/quant/qlib_data/cn_data \
   --date_field_name date \
   --symbol_field_name code
 
   # Collect calendar data
-  python scripts/data_collector/future_calendar_collector.py --qlib_dir ~/.qlib/qlib_data/cn_data/ --region cn
+  python scripts/data_collector/future_calendar_collector.py --qlib_dir /media/arthurthomas/CN300/quant/qlib_data/cn_data/ --region cn
 
 
   # Download the CSI500/CSI300/CSI100 stock universe
-  python scripts/data_collector/cn_index/collector.py --index_name CSI500 --qlib_dir ~/.qlib/qlib_data/cn_data/ --method parse_instruments
+  python scripts/data_collector/cn_index/collector.py --index_name CSI500 --qlib_dir /media/arthurthomas/CN300/quant/qlib_data/cn_data/ --method parse_instruments
   ```
 
 
-- Alternatively, stock data (out-dated) will be automatically downloaded to `~/.qlib/qlib_data/cn_data`.
+- Alternatively, stock data (out-dated) will be automatically downloaded to `/media/arthurthomas/CN300/quant/qlib_data/cn_data`.
 
 
 - You can modify backtest configuration files which are located at:
