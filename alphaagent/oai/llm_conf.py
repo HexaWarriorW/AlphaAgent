@@ -7,11 +7,6 @@ from alphaagent.core.conf import ExtendedBaseSettings
 
 class LLMSettings(ExtendedBaseSettings):
     log_llm_chat_content: bool = True
-
-    use_azure: bool = False
-    chat_use_azure_token_provider: bool = False
-    embedding_use_azure_token_provider: bool = False
-    managed_identity_client_id: str | None = None
     max_retry: int = 10
     retry_wait_seconds: int = 1
     dump_chat_cache: bool = False
@@ -35,8 +30,6 @@ class LLMSettings(ExtendedBaseSettings):
     openai_api_key: str = ""  # TODO: simplify the key design.
     openai_base_url: str = ""
     chat_openai_api_key: str = ""
-    chat_azure_api_base: str = ""
-    chat_azure_api_version: str = ""
     chat_model: str = "gpt-4-turbo"
     reasoning_model: str = ""
     chat_max_tokens: int = 3000
@@ -53,48 +46,12 @@ class LLMSettings(ExtendedBaseSettings):
 
     # Embedding configs
     embedding_openai_api_key: str = ""
-    embedding_azure_api_base: str = ""
-    embedding_azure_api_version: str = ""
     embedding_model: str = ""
     embedding_max_str_num: int = 50
     embedding_api_key: str = ""
     embedding_base_url: str = ""
 
-    # offline llama2 related config
-    use_llama2: bool = False
-    llama2_ckpt_dir: str = "Llama-2-7b-chat"
-    llama2_tokenizer_path: str = "Llama-2-7b-chat/tokenizer.model"
-    llams2_max_batch_size: int = 8
-
     # server served endpoints
-    use_gcr_endpoint: bool = False
-    gcr_endpoint_type: str = "llama2_70b"  # or "llama3_70b", "phi2", "phi3_4k", "phi3_128k"
-
-    llama2_70b_endpoint: str = ""
-    llama2_70b_endpoint_key: str = ""
-    llama2_70b_endpoint_deployment: str = ""
-
-    llama3_70b_endpoint: str = ""
-    llama3_70b_endpoint_key: str = ""
-    llama3_70b_endpoint_deployment: str = ""
-
-    phi2_endpoint: str = ""
-    phi2_endpoint_key: str = ""
-    phi2_endpoint_deployment: str = ""
-
-    phi3_4k_endpoint: str = ""
-    phi3_4k_endpoint_key: str = ""
-    phi3_4k_endpoint_deployment: str = ""
-
-    phi3_128k_endpoint: str = ""
-    phi3_128k_endpoint_key: str = ""
-    phi3_128k_endpoint_deployment: str = ""
-
-    gcr_endpoint_temperature: float = 0.7
-    gcr_endpoint_top_p: float = 0.9
-    gcr_endpoint_do_sample: bool = False
-    gcr_endpoint_max_token: int = 100
-
     chat_model_map: str = "{}"
 
 

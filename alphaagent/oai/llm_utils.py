@@ -34,19 +34,10 @@ def md5_hash(input_string: str) -> str:
 
 
 try:
-    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-except ImportError:
-    logger.warning("azure.identity is not installed.")
-
-try:
     import openai
 except ImportError:
     logger.warning("openai is not installed.")
 
-try:
-    from llama import Llama
-except ImportError:
-    logger.warning("llama is not installed.")
 
 
 class ConvManager:
@@ -253,76 +244,17 @@ class APIBackend:
         chat_api_version: str | None = None,
         embedding_api_key: str | None = None,
         embedding_model: str | None = None,
-        embedding_api_base: str | None = None,
-        embedding_api_version: str | None = None,
         use_chat_cache: bool | None = None,
         dump_chat_cache: bool | None = None,
         use_embedding_cache: bool | None = None,
         dump_embedding_cache: bool | None = None,
     ) -> None:
-        if LLM_SETTINGS.use_llama2:
-            self.generator = Llama.build(
-                ckpt_dir=LLM_SETTINGS.llama2_ckpt_dir,
-                tokenizer_path=LLM_SETTINGS.llama2_tokenizer_path,
-                max_seq_len=LLM_SETTINGS.max_tokens,
-                max_batch_size=LLM_SETTINGS.llams2_max_batch_size,
-            )
-            self.encoder = None
-        elif LLM_SETTINGS.use_gcr_endpoint:
-            gcr_endpoint_type = LLM_SETTINGS.gcr_endpoint_type
-            if gcr_endpoint_type == "llama2_70b":
-                self.gcr_endpoint_key = LLM_SETTINGS.llama2_70b_endpoint_key
-                self.gcr_endpoint_deployment = LLM_SETTINGS.llama2_70b_endpoint_deployment
-                self.gcr_endpoint = LLM_SETTINGS.llama2_70b_endpoint
-            elif gcr_endpoint_type == "llama3_70b":
-                self.gcr_endpoint_key = LLM_SETTINGS.llama3_70b_endpoint_key
-                self.gcr_endpoint_deployment = LLM_SETTINGS.llama3_70b_endpoint_deployment
-                self.gcr_endpoint = LLM_SETTINGS.llama3_70b_endpoint
-            elif gcr_endpoint_type == "phi2":
-                self.gcr_endpoint_key = LLM_SETTINGS.phi2_endpoint_key
-                self.gcr_endpoint_deployment = LLM_SETTINGS.phi2_endpoint_deployment
-                self.gcr_endpoint = LLM_SETTINGS.phi2_endpoint
-            elif gcr_endpoint_type == "phi3_4k":
-                self.gcr_endpoint_key = LLM_SETTINGS.phi3_4k_endpoint_key
-                self.gcr_endpoint_deployment = LLM_SETTINGS.phi3_4k_endpoint_deployment
-                self.gcr_endpoint = LLM_SETTINGS.phi3_4k_endpoint
-            elif gcr_endpoint_type == "phi3_128k":
-                self.gcr_endpoint_key = LLM_SETTINGS.phi3_128k_endpoint_key
-                self.gcr_endpoint_deployment = LLM_SETTINGS.phi3_128k_endpoint_deployment
-                self.gcr_endpoint = LLM_SETTINGS.phi3_128k_endpoint
-            else:
-                error_message = f"Invalid gcr_endpoint_type: {gcr_endpoint_type}"
-                raise ValueError(error_message)
-            self.headers = {
-                "Content-Type": "application/json",
-                "Authorization": ("Bearer " + self.gcr_endpoint_key),
-            }
-            self.gcr_endpoint_temperature = LLM_SETTINGS.gcr_endpoint_temperature
-            self.gcr_endpoint_top_p = LLM_SETTINGS.gcr_endpoint_top_p
-            self.gcr_endpoint_do_sample = LLM_SETTINGS.gcr_endpoint_do_sample
-            self.gcr_endpoint_max_token = LLM_SETTINGS.gcr_endpoint_max_token
-            if not os.environ.get("PYTHONHTTPSVERIFY", "") and hasattr(ssl, "_create_unverified_context"):
-                ssl._create_default_https_context = ssl._create_unverified_context  # noqa: SLF001
-            self.chat_model_map = json.loads(LLM_SETTINGS.chat_model_map)
-            self.chat_model = LLM_SETTINGS.chat_model if chat_model is None else chat_model
-            self.encoder = None
-        else:
-            self.use_azure = LLM_SETTINGS.use_azure
-            self.chat_use_azure_token_provider = LLM_SETTINGS.chat_use_azure_token_provider
-            self.embedding_use_azure_token_provider = LLM_SETTINGS.embedding_use_azure_token_provider
-            self.managed_identity_client_id = LLM_SETTINGS.managed_identity_client_id
-
+        if True:
             # Priority: chat_api_key/embedding_api_key > openai_api_key > os.environ.get("OPENAI_API_KEY")
             # TODO: Simplify the key design. Consider Pandatic's field alias & priority.
             self.chat_api_key = (
                 chat_api_key
                 or LLM_SETTINGS.chat_openai_api_key
-                or LLM_SETTINGS.openai_api_key
-                or os.environ.get("OPENAI_API_KEY")
-            )
-            self.embedding_api_key = (
-                embedding_api_key
-                or LLM_SETTINGS.embedding_openai_api_key
                 or LLM_SETTINGS.openai_api_key
                 or os.environ.get("OPENAI_API_KEY")
             )
@@ -346,61 +278,16 @@ class APIBackend:
             self.chat_model = LLM_SETTINGS.chat_model if chat_model is None else chat_model
             self.reasoning_model = LLM_SETTINGS.reasoning_model if reasoning_model is None else reasoning_model
             self.chat_model_map = json.loads(LLM_SETTINGS.chat_model_map)
-            # self.encoder = self._get_encoder()
             
-            self.chat_api_base = LLM_SETTINGS.chat_azure_api_base if chat_api_base is None else chat_api_base
-            self.chat_api_version = (
-                LLM_SETTINGS.chat_azure_api_version if chat_api_version is None else chat_api_version
-            )
+            self.chat_api_base = chat_api_base
+            self.chat_api_version = chat_api_version
             self.chat_stream = LLM_SETTINGS.chat_stream
             self.chat_seed = LLM_SETTINGS.chat_seed
 
             self.embedding_model = LLM_SETTINGS.embedding_model if embedding_model is None else embedding_model
-            self.embedding_api_base = (
-                LLM_SETTINGS.embedding_azure_api_base if embedding_api_base is None else embedding_api_base
-            )
-            self.embedding_api_version = (
-                LLM_SETTINGS.embedding_azure_api_version if embedding_api_version is None else embedding_api_version
-            )
-
-            if self.use_azure:
-                if self.chat_use_azure_token_provider or self.embedding_use_azure_token_provider:
-                    dac_kwargs = {}
-                    if self.managed_identity_client_id is not None:
-                        dac_kwargs["managed_identity_client_id"] = self.managed_identity_client_id
-                    credential = DefaultAzureCredential(**dac_kwargs)
-                    token_provider = get_bearer_token_provider(
-                        credential,
-                        "https://cognitiveservices.azure.com/.default",
-                    )
-                if self.chat_use_azure_token_provider:
-                    self.chat_client = openai.AzureOpenAI(
-                        azure_ad_token_provider=token_provider,
-                        api_version=self.chat_api_version,
-                        azure_endpoint=self.chat_api_base,
-                    )
-                else:
-                    self.chat_client = openai.AzureOpenAI(
-                        api_key=self.chat_api_key,
-                        api_version=self.chat_api_version,
-                        azure_endpoint=self.chat_api_base,
-                    )
-
-                if self.embedding_use_azure_token_provider:
-                    self.embedding_client = openai.AzureOpenAI(
-                        azure_ad_token_provider=token_provider,
-                        api_version=self.embedding_api_version,
-                        azure_endpoint=self.embedding_api_base,
-                    )
-                else:
-                    self.embedding_client = openai.AzureOpenAI(
-                        api_key=self.embedding_api_key,
-                        api_version=self.embedding_api_version,
-                        azure_endpoint=self.embedding_api_base,
-                    )
-            else:
-                self.chat_client = openai.OpenAI(api_key=self.chat_api_key, base_url=self.base_url)
-                self.embedding_client = openai.OpenAI(api_key=self.embedding_api_key, base_url=self.embedding_base_url)
+            
+            self.chat_client = openai.OpenAI(api_key=self.chat_api_key, base_url=self.base_url)
+            self.embedding_client = openai.OpenAI(api_key=self.embedding_api_key, base_url=self.embedding_base_url)
 
         self.dump_chat_cache = LLM_SETTINGS.dump_chat_cache if dump_chat_cache is None else dump_chat_cache
         self.use_chat_cache = LLM_SETTINGS.use_chat_cache if use_chat_cache is None else use_chat_cache
@@ -415,36 +302,8 @@ class APIBackend:
             self.cache = SQliteLazyCache(cache_location=self.cache_file_location)
 
         # transfer the config to the class if the config is not supposed to change during the runtime
-        self.use_llama2 = LLM_SETTINGS.use_llama2
-        self.use_gcr_endpoint = LLM_SETTINGS.use_gcr_endpoint
         self.retry_wait_seconds = LLM_SETTINGS.retry_wait_seconds
 
-    def _get_encoder(self):
-        """
-        tiktoken.encoding_for_model(self.chat_model) does not cover all cases it should consider.
-
-        This function attempts to handle several edge cases.
-        """
-
-        # 1) cases
-        def _azure_patch(model: str) -> str:
-            """
-            When using Azure API, self.chat_model is the deployment name that can be any string.
-            For example, it may be `gpt-4o_2024-08-06`. But tiktoken.encoding_for_model can't handle this.
-            """
-            return model.replace("_", "-")
-
-        model = self.chat_model
-        try:
-            return tiktoken.encoding_for_model(model)
-        except KeyError:
-            logger.warning(f"Failed to get encoder. Trying to patch the model name")
-            for patch_func in [_azure_patch]:
-                try:
-                    return tiktoken.encoding_for_model(patch_func(model))
-                except KeyError:
-                    logger.error(f"Failed to get encoder even after patching with {patch_func.__name__}")
-                    raise
 
     def build_chat_session(
         self,
@@ -603,16 +462,10 @@ class APIBackend:
                 filtered_input_content_list[i : i + LLM_SETTINGS.embedding_max_str_num]
                 for i in range(0, len(filtered_input_content_list), LLM_SETTINGS.embedding_max_str_num)
             ]:
-                if self.use_azure:
-                    response = self.embedding_client.embeddings.create(
-                        model=self.embedding_model,
-                        input=sliced_filtered_input_content_list,
-                    )
-                else:
-                    response = self.embedding_client.embeddings.create(
-                        model=self.embedding_model,
-                        input=sliced_filtered_input_content_list,
-                    )
+                response = self.embedding_client.embeddings.create(
+                    model=self.embedding_model,
+                    input=sliced_filtered_input_content_list,
+                )
                 for index, data in enumerate(response.data):
                     content_to_embedding_dict[sliced_filtered_input_content_list[index]] = data.embedding
 
@@ -693,37 +546,7 @@ class APIBackend:
             model = self.chat_model_map.get(tag, self.chat_model)
 
         finish_reason = None
-        if self.use_llama2:
-            response = self.generator.chat_completion(
-                messages,  # type: ignore
-                max_gen_len=max_tokens,
-                temperature=temperature,
-            )
-            resp = response[0]["generation"]["content"]
-            if LLM_SETTINGS.log_llm_chat_content:
-                logger.info(f"{LogColors.CYAN}Response:{resp}{LogColors.END}", tag="llm_messages")
-        elif self.use_gcr_endpoint:
-            body = str.encode(
-                json.dumps(
-                    {
-                        "input_data": {
-                            "input_string": messages,
-                            "parameters": {
-                                "temperature": self.gcr_endpoint_temperature,
-                                "top_p": self.gcr_endpoint_top_p,
-                                "max_new_tokens": self.gcr_endpoint_max_token,
-                            },
-                        },
-                    },
-                ),
-            )
-
-            req = urllib.request.Request(self.gcr_endpoint, body, self.headers)  # noqa: S310
-            response = urllib.request.urlopen(req)  # noqa: S310
-            resp = json.loads(response.read().decode())["output"]
-            if LLM_SETTINGS.log_llm_chat_content:
-                logger.info(f"{LogColors.CYAN}Response:{resp}{LogColors.END}", tag="llm_messages")
-        else:
+        if True:
             kwargs = dict(
                 model=model,
                 messages=messages,
@@ -795,25 +618,7 @@ class APIBackend:
 
     def calculate_token_from_messages(self, messages: list[dict]) -> int:
         return 0
-        if self.use_llama2 or self.use_gcr_endpoint:
-            logger.warning("num_tokens_from_messages() is not implemented for model llama2.")
-            return 0  # TODO implement this function for llama2
 
-        if "gpt4" in self.chat_model or "gpt-4" in self.chat_model:
-            tokens_per_message = 3
-            tokens_per_name = 1
-        else:
-            tokens_per_message = 4  # every message follows <start>{role/name}\n{content}<end>\n
-            tokens_per_name = -1  # if there's a name, the role is omitted
-        num_tokens = 0
-        for message in messages:
-            num_tokens += tokens_per_message
-            for key, value in message.items():
-                num_tokens += len(self.encoder.encode(value))
-                if key == "name":
-                    num_tokens += tokens_per_name
-        num_tokens += 3  # every reply is primed with <start>assistant<message>
-        return num_tokens
 
     def build_messages_and_calculate_token(
         self,

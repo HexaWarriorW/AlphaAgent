@@ -52,15 +52,8 @@ class ExtendedBaseSettings(BaseSettings):
 
 
 class RDAgentSettings(ExtendedBaseSettings):
-    # TODO: (xiao) I think LLMSetting may be a better name.
-    # TODO: (xiao) I think most of the config should be in oai.config
-    # Log configs
-    # TODO: (xiao) think it can be a separate config.
     log_trace_path: str | None = None
 
-    # azure document intelligence configs
-    azure_document_intelligence_key: str = ""
-    azure_document_intelligence_endpoint: str = ""
     # factor extraction conf
     max_input_duplicate_factor_group: int = 300
     max_output_duplicate_factor_group: int = 20

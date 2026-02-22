@@ -23,7 +23,6 @@ pymupdf  # Extract shotsreens from pdf
 
 # PDF related
 pypdf
-azure-ai-formrecognizer
 
 # factor implementations
 tables
