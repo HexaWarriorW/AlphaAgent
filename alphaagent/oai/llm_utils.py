@@ -240,8 +240,6 @@ class APIBackend:
         chat_api_key: str | None = None,
         chat_model: str | None = None,
         reasoning_model: str | None = None,
-        chat_api_base: str | None = None,
-        chat_api_version: str | None = None,
         embedding_api_key: str | None = None,
         embedding_model: str | None = None,
         use_chat_cache: bool | None = None,
@@ -250,37 +248,20 @@ class APIBackend:
         dump_embedding_cache: bool | None = None,
     ) -> None:
         if True:
-            # Priority: chat_api_key/embedding_api_key > openai_api_key > os.environ.get("OPENAI_API_KEY")
+            # Priority: chat_api_key/embedding_api_key > openai_api_key > os.environ.get("CHAT_API_KEY")
             # TODO: Simplify the key design. Consider Pandatic's field alias & priority.
-            self.chat_api_key = (
-                chat_api_key
-                or LLM_SETTINGS.chat_openai_api_key
-                or LLM_SETTINGS.openai_api_key
-                or os.environ.get("OPENAI_API_KEY")
-            )
+            self.chat_api_key = os.environ.get("CHAT_API_KEY")
             
-            self.base_url = (
-                LLM_SETTINGS.openai_base_url
-                or os.environ.get("OPENAI_BASE_URL")
-            )
+            self.base_url = os.environ.get("CHAT_BASE_URL")
             
-            self.embedding_base_url = (
-                LLM_SETTINGS.embedding_base_url
-                or os.environ.get("EMBEDDING_BASE_URL")
-            )
+            self.embedding_base_url = self.base_url
 
-            self.embedding_api_key = (
-                LLM_SETTINGS.embedding_api_key
-                or os.environ.get("EMBEDDING_API_KEY")
-            )
+            self.embedding_api_key = self.chat_api_key
             
-
             self.chat_model = LLM_SETTINGS.chat_model if chat_model is None else chat_model
             self.reasoning_model = LLM_SETTINGS.reasoning_model if reasoning_model is None else reasoning_model
             self.chat_model_map = json.loads(LLM_SETTINGS.chat_model_map)
             
-            self.chat_api_base = chat_api_base
-            self.chat_api_version = chat_api_version
             self.chat_stream = LLM_SETTINGS.chat_stream
             self.chat_seed = LLM_SETTINGS.chat_seed
 
@@ -436,7 +417,9 @@ class APIBackend:
                         content[: len(content) // 2] for content in kwargs.get("input_content_list", [])
                     ]
             except Exception as e:  # noqa: BLE001
-                logger.warning(e)
+                import traceback
+                traceback_str = traceback.format_exc()
+                logger.warning(f"Exception occurred: {e}\n{traceback_str}")
                 logger.warning(f"Retrying {i+1}th time...")
                 time.sleep(self.retry_wait_seconds)
         error_message = f"Failed to create chat completion after {max_retry} retries."

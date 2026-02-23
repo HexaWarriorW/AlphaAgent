@@ -89,7 +89,7 @@ This repository follows the implementation of [RD-Agent](https://github.com/micr
 
 
 ### ⚙️ Configuration
-- For OpenAI compatible API, ensure both `OPENAI_BASE_URL` and `OPENAI_API_KEY` are configured in the `.env` file.
+- For OpenAI compatible API, ensure both `CHAT_BASE_URL` and `CHAT_API_KEY` are configured in the `.env` file.
 - `REASONING_MODEL` is used in the idea agent and factor agent, while `CHAT_MODEL` is for debugging factors and generating feedbacks.
 - Slow-thinking models, such as o3-mini are preferred for the `REASONING_MODEL`.
 - To run the project in a local environment (instead of Docker), add `USE_LOCAL=True` to the `.env` file.
