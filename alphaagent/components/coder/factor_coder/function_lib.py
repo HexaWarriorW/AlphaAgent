@@ -205,15 +205,22 @@ def TS_CORR(df1:pd.Series, df2: np.ndarray | pd.Series, p:int=5):
         def rolling_corr(group, df2, p):
             # 获取当前分组的 instrument
             instrument = group.name
+            if isinstance(p, pd.Series):
+                p[p.isna()] = 0
+                p_val = int(p.quantile(0.75))
+            elif isinstance(p, int) or isinstance(p, float):
+                p_val = int(p)
+            else:
+                raise ValueError(f"参数p的类型必须是int、float或pd.Series，接收到{type(p).__name__}")
             # 从 df2 中提取对应的 instrument 数据
             df2_group = df2.xs(instrument, level='instrument')
             # 计算滚动相关性
-            return group.rolling(p, min_periods=2).corr(df2_group)
+            return group.rolling(window = p_val, min_periods=2).corr(df2_group)
 
         # 使用 groupby 和 apply 来计算每个 instrument 的滚动相关性
-        result = df1.groupby('instrument').apply(lambda x: rolling_corr(x, df2, p))
+        result = df1.groupby('instrument', group_keys=False).apply(lambda x: rolling_corr(x, df2, p))
         # 由于 apply 会改变索引结构，我们需要将其恢复为原始结构
-        result = result.reset_index(level=0, drop=True).sort_index()
+        # result = result.reset_index(level=0, drop=True).sort_index()
         return result
 
 
@@ -234,9 +241,9 @@ def TS_COVARIANCE(df1:pd.DataFrame, df2:pd.DataFrame, p:int=5):
             return group.rolling(p, min_periods=2).cov(df2_group)
 
         # 使用 groupby 和 apply 来计算每个 instrument 的滚动相关性
-        result = df1.groupby('instrument').apply(lambda x: rolling_cov(x, df2, p))
+        result = df1.groupby('instrument', group_keys=False).apply(lambda x: rolling_cov(x, df2, p))
         # 由于 apply 会改变索引结构，我们需要将其恢复为原始结构
-        result = result.reset_index(level=0, drop=True).sort_index()
+        # result = result.reset_index(level=0, drop=True).sort_index()
         return result
 
 @datatype_adapter

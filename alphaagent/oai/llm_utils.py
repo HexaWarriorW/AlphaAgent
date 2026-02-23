@@ -408,7 +408,9 @@ class APIBackend:
                 if chat_completion:
                     return self._create_chat_completion_auto_continue(**kwargs)
             except openai.BadRequestError as e:  # noqa: PERF203
-                logger.warning(e)
+                import traceback
+                traceback_str = traceback.format_exc()
+                logger.warning(f"BadRequestError occurred: {e}\n{traceback_str}")
                 logger.warning(f"Retrying {i+1}th time...")
                 if "'messages' must contain the word 'json' in some form" in e.message:
                     kwargs["add_json_in_prompt"] = True
