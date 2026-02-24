@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Tuple
 
@@ -12,7 +13,8 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_conf import LLM_SETTINGS
 from alphaagent.oai.llm_utils import APIBackend
 
-evaluate_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+evaluate_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 
 def shape_evaluator(prediction: np.ndarray, target_shape: Tuple = None) -> Tuple[str, bool]:

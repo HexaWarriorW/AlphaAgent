@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from jinja2 import Environment, StrictUndefined
@@ -20,7 +21,8 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_conf import LLM_SETTINGS
 from alphaagent.oai.llm_utils import APIBackend
 
-coder_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+coder_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 
 class ModelMultiProcessEvolvingStrategy(MultiProcessEvolvingStrategy):

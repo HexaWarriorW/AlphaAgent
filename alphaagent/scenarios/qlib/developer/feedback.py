@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -16,7 +17,8 @@ from alphaagent.log import logger
 from alphaagent.oai.llm_utils import APIBackend
 from alphaagent.utils import convert2bool
 
-rdagent_feedback_prompts = Prompts(file_path=Path(__file__).parent.parent / "prompts_rdagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+rdagent_feedback_prompts = Prompts(file_path=Path(__file__).parent.parent / f"prompts_rdagent_{language}.yaml")
 DIRNAME = Path(__file__).absolute().resolve().parent
 
 
@@ -123,7 +125,8 @@ class QlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Feedback):
 
 
 
-alphaagent_feedback_prompts = Prompts(file_path=Path(__file__).parent.parent / "prompts_alphaagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+alphaagent_feedback_prompts = Prompts(file_path=Path(__file__).parent.parent / f"prompts_alphaagent_{language}.yaml")
 class AlphaAgentQlibFactorHypothesisExperiment2Feedback(HypothesisExperiment2Feedback):
     def generate_feedback(self, exp: Experiment, hypothesis: Hypothesis, trace: Trace) -> HypothesisFeedback:
         """

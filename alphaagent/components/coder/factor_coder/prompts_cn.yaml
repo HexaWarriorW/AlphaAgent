@@ -1,0 +1,203 @@
+evaluator_code_feedback_v1_system: |-
+  用户正在尝试在以下场景中实现一些因子：
+  {{ scenario }}
+  用户将向你提供因子的信息。
+
+  你的工作是检查用户的代码是否与因子和场景相符。
+  用户将提供源 Python 代码和执行错误消息（如果执行失败）。
+  用户可能向你提供基准代码以供批评。你不应以任何形式向用户泄露基准代码，但可以用它来提供批评。
+
+  用户还比较了用户代码生成的因子值和基准代码的因子值。用户将向你提供一些比较两个输出的分析结果。你可能会找到代码中导致两个输出之间差异的一些错误。
+
+  如果提供了基准代码，你的批评应仅考虑检查用户代码是否与基准代码相符，因为基准代码肯定是正确的。
+  如果未提供基准代码，你的批评应考虑用户代码是否合理且正确。
+
+  注意，你的批评不是供用户调试代码。它们将发送给编码代理以更正代码。所以不要给用户任何后续项，如"请检查代码第 XXX 行"。
+
+  你的建议不应包含任何代码，仅包含一些清晰简明的建议。请在回复中指出代码中非常关键的问题，忽略不重要的问题以避免混淆。如果代码中未发现大问题，你可回复"未发现批评"。
+
+  你应为每条批评提供建议以帮助用户改进代码。请按以下格式回复批评。以下是输出的示例结构：
+  批评 1：对批评 1 的批评消息
+  批评 2：对批评 2 的批评消息
+
+evaluator_code_feedback_v1_user: |-
+  ----------------------因子信息：----------------------
+  {{ factor_information }}
+  ----------------------Python 代码：----------------------
+  {{ code }}
+  ----------------------执行反馈：----------------------
+  {{ execution_feedback }}
+  {% if value_feedback is not none %}
+  ----------------------因子值反馈：----------------------
+  {{ value_feedback }}
+  {% endif %}
+  {% if gt_code is not none %}
+  ----------------------基准 Python 代码：----------------------
+  {{ gt_code }}
+  {% endif %}
+
+evolving_strategy_factor_implementation_v1_system: |-
+  用户正在尝试在以下场景中实现一些因子：
+  {{ scenario }}
+  你的代码应以任何形式与场景相对应，这意味着用户需要通过你的代码获得确切的因子值。
+
+  为帮助你编写正确的代码，用户可能会提供多种有助于编写代码的信息：
+  1. 用户可能提供类似因子的正确代码。你应从这些代码中学习以编写正确的代码。
+  2. 用户可能提供失败的前一代码及对应的反馈。反馈包含执行、代码和因子值。你应分析反馈并尝试更正最新代码。
+  3. 用户可能提供对最新失败代码的建议以及一些相似的失败与更正对。每对包含具有相似错误的失败代码及对应的更正版本代码。你应从这些建议中学习以编写正确的代码。
+
+  你必须基于下方你的前一最新尝试编写代码，该尝试包含你的前一代码及代码反馈，你应仔细阅读前一尝试，不得修改代码中正确的部分。
+
+  {% if queried_former_failed_knowledge|length != 0 %}
+  ----------------------你前一最新尝试：----------------------
+  =====前一实现的代码=====
+  {{ queried_former_failed_knowledge[-1].implementation.code }}
+  =====对前一实现的反馈=====
+  {{ queried_former_failed_knowledge[-1].feedback }}
+  {% endif %}
+
+  请按以下格式回复代码，使用 `\n` 分隔代码，不包含任何其他内容。以下是 JSON 输出的示例结构：
+  {
+      "code": "作为字符串的 Python 代码。"
+  }
+
+evolving_strategy_factor_implementation_v2_user: |-
+  ----------------------目标因子信息：----------------------
+  {{ factor_information_str }}
+
+  {% if queried_similar_error_knowledge|length != 0 %}
+  {% if error_summary_critics is none %}
+  回顾你上次的失败，你的实现遇到了一些错误。
+  在做其他任务时，你遇到了一些相似的错误，但最终解决了。以下是一些示例：
+  {% for error_content, similar_error_knowledge in queried_similar_error_knowledge %} 
+  ----------------------类似错误的因子信息（{{error_content}}）：----------------------
+  {{ similar_error_knowledge[0].target_task.get_task_information() }}
+  =====具有相似错误的代码（{{error_content}}）：=====
+  {{ similar_error_knowledge[0].implementation.code }}
+  =====前一代码的成功代码（具有相似错误）（{{error_content}}）：=====
+  {{ similar_error_knowledge[1].implementation.code }}
+  {% endfor %}
+  {% else %}
+  回顾你上次的失败，你的实现遇到了一些错误。
+  审查了一些相似的错误及其解决方案后，以下是一些帮助你更正代码的建议：
+  {{error_summary_critics}}
+  {% endif %}
+  {% endif %}
+  {% if queried_similar_successful_knowledge|length != 0 %}
+  以下是一些类似组件任务的成功实现，作为参考：
+  ----------------------类似因子的正确代码：----------------------
+  {% for similar_successful_knowledge in queried_similar_successful_knowledge %}
+  =====因子 {{loop.index}}：=====
+  {{ similar_successful_knowledge.target_task.get_task_information() }}
+  =====代码：=====
+  {{ similar_successful_knowledge.implementation.code }}
+  {% endfor %}
+  {% endif %}
+  {% if latest_attempt_to_latest_successful_execution is not none %}
+  你尝试更正之前失败的代码但仍遇到了一些错误。以下是最新尝试到最新成功执行，尝试不要在你的新代码中犯同样的错误：
+  =====你的最新尝试=====
+  {{ latest_attempt_to_latest_successful_execution.implementation.code }}
+  =====对你的最新尝试的反馈=====
+  {{ latest_attempt_to_latest_successful_execution.feedback }}
+  {% endif %}
+
+evolving_strategy_error_summary_v2_system: |-
+  用户正在尝试在以下场景中实现一些因子：
+  {{ scenario }}
+  用户正在进行以下任务：
+  {{factor_information_str}}
+
+  你已经编写了一些代码，但遇到了如下错误：
+  {{code_and_feedback}}
+
+  用户找到了一些遇到相似错误的任务及其最终正确解决方案。
+  请参考这些相似的错误及其解决方案，提供一些清晰、简明且准确的批评，可能帮助你解决代码中的问题。
+
+  你的建议不应包含任何代码，仅包含一些清晰简明的建议。请在回复中指出代码中非常关键的问题，忽略不重要的问题以避免混淆。如果代码中未发现大问题，你可回复"未发现批评"。
+
+  请按以下格式回复批评。以下是输出的示例结构：
+  批评 1：对批评 1 的批评消息
+  批评 2：对批评 2 的批评消息
+
+evolving_strategy_error_summary_v2_user: |-
+  {% if queried_similar_error_knowledge|length != 0 %}
+  {% for error_content, similar_error_knowledge in queried_similar_error_knowledge %} 
+  ----------------------类似错误的因子信息（{{error_content}}）：----------------------
+  {{ similar_error_knowledge[0].target_task.get_task_information() }}
+  =====具有相似错误的代码（{{error_content}}）：=====
+  {{ similar_error_knowledge[0].implementation.code }}
+  =====前一代码的成功代码（具有相似错误）（{{error_content}}）：=====
+  {{ similar_error_knowledge[1].implementation.code }}
+  {% endfor %}
+  {% endif %}
+
+
+select_implementable_factor_system: |-
+  用户正在尝试在以下场景中实现一些因子：
+  {{ scenario }}
+  你的工作是帮助用户选择最容易实现的因子。由于缺乏信息或过度复杂，某些因子可能难以实现。用户将提供你应该选择的因子数量和因子信息，包括它们的描述、公式和变量解释。
+  用户将为你提供前一次实现因子的尝试及其反馈。你需要仔细审查你以前的尝试。某些因子已被反复尝试但未成功。你应考虑放弃这些因子。
+  请分析每个因子的难度，并提供原因，并以 JSON 格式回复选定的可实现因子的索引。以下是 JSON 输出的示例结构：
+  {
+      "Analysis": "分析每个因子的难度并提供原因，说明该因子是否可以实现。",
+      "selected_factor": "所选因子索引的索引列表，如 [0, 2, 3]。长度应为过滤后剩余的因子数。",
+  }
+
+select_implementable_factor_user: |-
+  你应该选择的因子数量：{{ factor_num }}
+  {% for factor_info in sub_tasks %} 
+  =============因子索引：{{factor_info[0]}}：=============
+  =====因子名称：=====
+  {{ factor_info[1].factor_name }}
+  =====因子描述：=====
+  {{ factor_info[1].factor_description }}
+  =====因子公式：=====
+  {{ factor_info[1].factor_formulation }}
+  {% if factor_info[2]|length != 0 %}
+  ----------------------你的前一次尝试：----------------------
+  {% for former_attempt in factor_info[2] %}
+  =====尝试 {{ loop.index }} 的代码=====
+  {{ former_attempt.implementation.code }}
+  =====尝试 {{ loop.index }} 的反馈=====
+  {{ former_attempt.feedback }}
+  {% endfor %}
+  {% endif %}
+  {% endfor %}
+
+evaluator_output_format_system: |-
+  用户正在尝试在以下场景中实现一些因子：
+  {{ scenario }}
+  用户将向你提供输出的格式。请帮助检查输出是否与格式相符。
+  请以 JSON 格式回复。以下是 JSON 输出的示例结构：
+  {
+      "output_format_decision": true,
+      "output_format_feedback": "输出格式正确。"
+  }
+
+
+evaluator_final_decision_v1_system: |-
+  用户正在尝试在以下场景中实现一些因子：
+  {{ scenario }}
+  用户已完成评估并从评估器获得了一些反馈。
+  评估器运行代码并获得因子值数据框，并提供关于用户代码和代码输出的多条反馈。你应分析反馈，考虑场景和因子描述，以对评估结果给出最终决定。最终决定包括因子是否被正确实现，如果不是，则详细反馈包含原因和建议。
+
+  实现最终决定遵循以下逻辑：
+  1. 如果值与基准值在小容差下完全相同，则实现被认为是正确的。
+  2. 如果值与基准值在 IC 或排名 IC 上具有高相关性，则实现被认为是正确的。
+  3. 如果未提供基准值，且代码执行成功（假设提供的数据正确），则实现被认为是正确的。任何异常，包括主动引发的异常，都被认为是代码的错误。此外，代码反馈必须与场景和因子描述相符。
+
+  请以 JSON 格式回复批评，不包含任何其他内容。以下是 JSON 输出的示例结构，请严格遵循格式：
+  {
+      "final_decision": true,
+      "final_feedback": "最终反馈消息，单行文本",
+  }
+
+evaluator_final_decision_v1_user: |-
+  ----------------------因子信息：----------------------
+  {{ factor_information }}
+  ----------------------执行反馈：----------------------
+  {{ execution_feedback }}
+  ----------------------代码反馈：----------------------
+  {{ code_feedback }}
+  ----------------------因子值反馈：----------------------
+  {{ value_feedback }}

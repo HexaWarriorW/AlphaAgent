@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import os
 from pathlib import Path
 from typing import Tuple
 
@@ -15,7 +16,8 @@ from alphaagent.core.proposal import (
 )
 from alphaagent.oai.llm_utils import APIBackend
 
-prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 
 class LLMHypothesisGen(HypothesisGen):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import multiprocessing as mp
+import os
 import re
 from pathlib import Path
 from typing import Mapping
@@ -28,7 +29,8 @@ from alphaagent.scenarios.qlib.factor_experiment_loader.json_loader import (
     FactorExperimentLoaderFromDict,
 )
 
-document_process_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+document_process_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 
 def classify_report_from_dict(

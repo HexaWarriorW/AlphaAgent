@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_utils import APIBackend
 
 DIRNAME = Path(__file__).absolute().resolve().parent
+language = os.getenv("LANGUAGE", "cn")
 
 
 class ModelCodeWriter(Developer[ModelExperiment]):
@@ -17,7 +19,7 @@ class ModelCodeWriter(Developer[ModelExperiment]):
         for t in exp.sub_tasks:
             mti = ModelFBWorkspace(t)
             mti.prepare()
-            pr = Prompts(file_path=DIRNAME / "prompt.yaml")
+            pr = Prompts(file_path=DIRNAME / f"prompt_{language}.yaml")
 
             user_prompt_tpl = Environment(undefined=StrictUndefined).from_string(pr["code_implement_user"])
             sys_prompt_tpl = Environment(undefined=StrictUndefined).from_string(pr["code_implement_sys"])

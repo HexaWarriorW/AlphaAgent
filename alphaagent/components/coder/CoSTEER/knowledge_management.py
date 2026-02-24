@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import random
 import re
 from itertools import combinations
@@ -217,7 +218,8 @@ class CoSTEERQueriedKnowledgeV2(CoSTEERQueriedKnowledgeV1):
 
 
 class CoSTEERRAGStrategyV2(RAGStrategy):
-    prompt = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+    language = os.getenv("LANGUAGE", "cn")
+    prompt = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
     def __init__(self, knowledgebase: CoSTEERKnowledgeBaseV2, settings: CoSTEERSettings) -> None:
         super().__init__(knowledgebase)

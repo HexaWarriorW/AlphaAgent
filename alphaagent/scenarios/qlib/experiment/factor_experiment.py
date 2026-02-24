@@ -1,4 +1,5 @@
 from copy import deepcopy
+import os
 from pathlib import Path
 
 from alphaagent.components.coder.factor_coder.factor import (
@@ -12,7 +13,8 @@ from alphaagent.core.scenario import Scenario
 from alphaagent.scenarios.qlib.experiment.utils import get_data_folder_intro
 from alphaagent.scenarios.qlib.experiment.workspace import QlibFBWorkspace
 
-rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_rdagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_rdagent_{language}.yaml")
 
 
 class QlibFactorExperiment(FactorExperiment[FactorTask, QlibFBWorkspace, FactorFBWorkspace]):
@@ -81,7 +83,7 @@ The simulator user can use to test your factor:
 
 
 
-alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_alphaagent.yaml")
+alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_alphaagent_{language}.yaml")
 class QlibAlphaAgentScenario(Scenario):
     def __init__(self, use_local: bool = True) -> None:
         super().__init__()

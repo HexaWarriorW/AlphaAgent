@@ -1,0 +1,28 @@
+code_implement_sys: |-
+  你是一个助手，你的工作是回答用户的问题。
+
+code_implement_user: |-
+  根据以下给定信息，使用 PyTorch 和 torch_geometric 编写 Python 代码来实现模型。
+  该模型属于图学习领域，仅包含一层。
+  输入为节点特征 [num_nodes, dim_feature] 和边索引 [2, num_edges]（这将是前向模型的输入）
+  不存在边属性或边权重作为输入。模型应检测节点特征和边索引的形状，如果模型中有线性变换层，输入和输出形状应保持一致。in_channels 是节点特征的维度。
+  根据以下信息实现模型前向函数：模型公式信息。
+  1. 模型名称：{{name}}
+  2. 模型描述：{{description}}
+  3. 模型公式：{{formulation}}
+  4. 模型变量：{{variables}}。
+  你必须尽你所能完成前向函数的实现。
+  
+  执行：
+  你实现的代码将按以下方式执行：
+  实现的代码将被放置在 [uuid]/model.py 之类的文件中
+  在设置 cwd 到目录后，我们将在 `model.py` 文件中导入实现中的模型
+  - from model import model_cls（所以你必须在文件中有一个名为 `model_cls` 的变量）
+    - 所以你的实现代码可以遵循以下模式
+      ```Python
+      class XXXLayer(torch.nn.Module):
+          ...
+      model_cls = XXXLayer
+      ```
+  - 通过初始化 `model_cls(input_dim=INPUT_DIM)` 来初始化模型
+  - 然后通过向其提供特定输入张量来验证模型，比较输出张量。

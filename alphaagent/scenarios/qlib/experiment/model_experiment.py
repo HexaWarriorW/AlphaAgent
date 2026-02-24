@@ -1,4 +1,5 @@
 from copy import deepcopy
+import os
 from pathlib import Path
 
 from alphaagent.components.coder.model_coder.model import (
@@ -11,7 +12,8 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.core.scenario import Scenario
 from alphaagent.scenarios.qlib.experiment.workspace import QlibFBWorkspace
 
-rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_rdagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_rdagent_{language}.yaml")
 
 
 class QlibModelExperiment(ModelExperiment[ModelTask, QlibFBWorkspace, ModelFBWorkspace]):

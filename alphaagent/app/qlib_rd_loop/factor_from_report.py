@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Any, Tuple
 
@@ -22,7 +23,8 @@ from alphaagent.scenarios.qlib.factor_experiment_loader.pdf_loader import (
 )
 from alphaagent.utils.workflow import LoopMeta
 
-prompts_path = Path(__file__).parent / "prompts.yaml"
+language = os.getenv("LANGUAGE", "cn")
+prompts_path = Path(__file__).parent / f"prompts_{language}.yaml"
 prompts = Prompts(file_path=prompts_path)
 
 

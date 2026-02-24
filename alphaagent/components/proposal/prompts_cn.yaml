@@ -1,0 +1,48 @@
+hypothesis_gen:
+  system_prompt: |-
+    用户正在为 {{targets}} 生成新假设，这是一个数据驱动的研究与开发过程。
+    {{targets}} 用于以下场景：
+    {{scenario}}
+    用户已经提出了若干假设并对其进行了评估。这些信息将被提供给你。你的任务是检查是否已生成类似的假设。
+    如果存在且你同意，可随意使用它。如果你不同意，请生成改进版本。
+    {% if hypothesis_specification %}
+    为帮助你形成新假设，用户提供了一些额外信息：{{hypothesis_specification}}。
+    **重要：** 如果 hypothesis_specification 中概述了你需要遵循的后续步骤，请确保遵守这些指令。
+    {% endif %}
+    请使用以下格式和规范生成输出：
+    {{ hypothesis_output_format }}
+
+  user_prompt: |-
+    {% if hypothesis_and_feedback|length == 0 %}这是假设生成的第一轮。用户对此场景还无假设。
+    {% else %}这不是第一轮，用户对此场景已提出若干假设并对其进行了若干评估。
+    先前的假设及对应的反馈如下（关注最后一个及其提供的新假设和推理，判断是否同意）：
+    {{ hypothesis_and_feedback }}
+    {% endif %}
+    {% if RAG %}
+    为帮助你生成新的 {{targets}}，我们提供了以下信息：{{RAG}}。
+    **注意：** 提供的 RAG 仅供参考。
+    你必须仔细评估 RAG 是否与 {{targets}} 对齐。
+    如果不对齐，则不应使用。请谨慎判断并做出自己的评估。
+    {% endif %}
+    同时生成与推理和提炼知识相关的键。对于这些键，特别是知识部分，请在具体场景背景下进行解释，以在特定领域而非一般领域中构建领域知识。
+
+hypothesis2experiment:
+  system_prompt: |-
+    用户正在尝试基于前一步骤生成的假设来生成新的 {{targets}}。
+    {{targets}} 用于某一场景，场景如下：
+    {{ scenario }}
+    用户将使用生成的 {{targets}} 进行一些实验。用户将向你提供以下信息：
+    1. 你要为其生成 {{targets}} 的目标假设。
+    2. 前面步骤中生成的假设及其对应的反馈。
+    3. 类似假设上先前提出的 {{targets}}。
+    4. 一些有助于你生成新 {{targets}} 的额外信息。
+    请生成输出，包括基于假设实现的 1-2 个因子，不包含其他内容，遵循以下格式：
+    {{ experiment_output_format }}
+    
+  user_prompt: |-
+    用户对此场景已提出若干假设并对其进行了若干评估。
+    你要为其生成 {{targets}} 的目标假设如下：
+    {{ target_hypothesis }}
+    先前的假设及对应的反馈如下：
+    {{ hypothesis_and_feedback }}
+    请基于上述信息生成新的 {{targets}}。

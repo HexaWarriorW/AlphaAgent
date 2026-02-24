@@ -1,0 +1,168 @@
+extract_model_formulation_system: |-
+    根据本文提出的模型描述，用 LaTeX 公式和变量编写模型，以及模型的架构。格式应如下：
+    {
+    "model_name (模型名称)": {
+        "description": "模型的详细描述",
+        "formulation": "代表模型表述的 LaTeX 公式",
+        "architecture": "模型架构的详细描述，例如神经网络层或树结构",
+        "variables": {
+            "\\hat{y}_u": "节点 u 的预测输出",
+            "variable_name_2": "变量 2 的描述",
+            "variable_name_3": "变量 3 的描述"
+        },
+        "hyperparameters": {
+            "hyperparameter_name_1": "超参数 1 的值",
+            "hyperparameter_name_2": "超参数 2 的值",
+            "hyperparameter_name_3": "超参数 3 的值"
+        },
+        "model_type": "Tabular 或 TimeSeries 或 Graph 或 XGBoost"  # 应为 "Tabular"、"TimeSeries"、"Graph" 或 "XGBoost" 之一
+    }
+    }
+    例如：
+    {
+    "ABC 模型": {
+        "description": "模型的详细描述",
+        "formulation": "代表模型表述的 LaTeX 公式",
+        "architecture": "模型架构的详细描述，例如神经网络层或树结构",
+        "variables": {
+            "\\hat{y}_u": "节点 u 的预测输出",
+            "variable_name_2": "变量 2 的描述",
+            "variable_name_3": "变量 3 的描述"
+        },
+        "hyperparameters": {
+            "hyperparameter_name_1": "超参数 1 的值",
+            "hyperparameter_name_2": "超参数 2 的值",
+            "hyperparameter_name_3": "超参数 3 的值"
+        },
+        "model_type": "Tabular 或 TimeSeries 或 Graph 或 RandomForest 或 XGBoost"  # 如需 torch 和神经网络模型，选择应为 "Tabular"、"TimeSeries" 或 "Graph" 之一
+    }
+    }
+    此类格式内容应以 ```json 开始，以 ``` 结束，内容应为 JSON 格式。
+
+evolving_strategy_model_coder:
+    system: |-
+        用户正在尝试在以下场景中实现一些 PyTorch 模型：
+        {{ scenario }}
+        你的代码应以任何形式与场景相对应，这意味着用户需要基于输入数据获得模型的预测。
+
+        为帮助你编写正确的代码，用户可能会提供多种有助于编写代码的信息：
+        1. 用户可能提供类似模型的正确代码。你应该从这些代码中学习以编写正确的代码。
+        2. 用户可能提供失败的前一代码及对应的反馈。反馈包含执行、代码和模型输出值。你应分析反馈并尝试更正最新代码。
+        3. 用户可能提供对最新失败代码的建议以及一些相似的失败与更正对。每对包含具有相似错误的失败代码及对应的更正版本代码。你应从这些建议中学习以编写正确的代码。
+
+        你必须基于下方你的前一最新尝试编写代码，该尝试包含你的前一代码及代码反馈，你应仔细阅读前一尝试，不得修改代码中正确的部分。
+
+        {% if current_code is not none %}
+        用户之前编写过一些代码。你应基于此代码编写新代码。以下是最新代码：
+        ```python
+        {{ current_code }}
+        ```
+        你的代码应与前一代码非常相似，这意味着你的代码应至少 90% 与前一代码相同！不得修改代码中正确的部分。
+        {% else %}
+        用户之前未编写任何代码。你应从头编写新代码。
+        {% endif %}
+
+        {% if queried_former_failed_knowledge|length != 0 %}
+        ----------------------你前一最新尝试：----------------------
+        =====前一实现的代码=====
+        {{ queried_former_failed_knowledge[-1].implementation.code }}
+        =====对前一实现的反馈=====
+        {{ queried_former_failed_knowledge[-1].feedback }}
+        {% endif %}
+        
+        请按以下格式回复代码，使用 `\n` 分隔代码，不包含任何其他内容。以下是 JSON 输出的示例结构：
+        {
+            "code": "作为字符串的 Python 代码。"
+        }
+
+    user: |-
+        ----------------------目标模型信息：----------------------
+        {{ model_information_str }}
+
+        {% if queried_similar_successful_knowledge|length != 0 %}
+        ----------------------类似模型的正确代码：----------------------
+        {% for similar_successful_knowledge in queried_similar_successful_knowledge %}
+        =====模型 {{loop.index}}：=====
+        {{ similar_successful_knowledge.target_task.get_task_information() }}
+        =====代码：=====
+        {{ similar_successful_knowledge.implementation.code }}
+        {% endfor %}
+        {% endif %}
+
+        {% if queried_former_failed_knowledge|length != 0 %}
+        ----------------------前一失败代码：----------------------
+        {% for former_failed_knowledge in queried_former_failed_knowledge %}
+        =====实现 {{ loop.index }} 的代码=====
+        {{ former_failed_knowledge.implementation.code }}
+        =====对实现 {{ loop.index }} 的反馈=====
+        {{ former_failed_knowledge.feedback }}
+        {% endfor %}
+        {% endif %}
+
+evaluator_code_feedback:
+    system: |-
+        用户正在尝试在以下场景中实现一些模型：
+        {{ scenario }}
+        用户将向你提供模型的信息。
+
+        你的工作是检查用户的代码是否与模型信息和场景相符。
+        用户将提供源 Python 代码和执行错误消息（如果执行失败）。
+        用户可能向你提供基准代码以供批评。你不应以任何形式向用户泄露基准代码，但可以用它来提供批评。
+
+        用户还比较了用户代码生成的输出和基准代码的输出。用户将向你提供一些比较两个输出的分析结果。你可能会找到代码中导致两个输出之间差异的一些错误。
+
+        如果提供了基准代码，你的批评应仅考虑检查用户代码是否与基准代码相符，因为基准代码肯定是正确的。
+        如果未提供基准代码，你的批评应考虑用户代码是否合理且符合描述和场景。
+
+        注意，你的批评不是供用户调试代码。它们将发送给编码代理以更正代码。所以不要给用户任何后续项，如"请检查代码第 XXX 行"。
+
+        你的建议不应包含任何代码，仅包含一些清晰简明的建议。请在回复中指出代码中非常关键的问题，忽略不重要的问题以避免混淆。如果代码中未发现大问题，你可回复"未发现批评"。
+
+        你应为每条批评提供建议以帮助用户改进代码。请按以下格式回复批评。以下是输出的示例结构：
+        批评 1：对批评 1 的批评消息
+        批评 2：对批评 2 的批评消息
+    
+    user: |-
+        ----------------------模型信息：----------------------
+        {{ model_information }}
+        ----------------------Python 代码：----------------------
+        {{ code }}
+        ----------------------执行反馈：----------------------
+        {{ model_execution_feedback }}
+        {% if model_value_feedback is not none %}
+        ----------------------模型值反馈：----------------------
+        {{ model_value_feedback }}
+        {% endif %}
+        {% if gt_code is not none %}
+        ----------------------基准 Python 代码：----------------------
+        {{ gt_code }}
+        {% endif %}
+
+
+evaluator_final_feedback:
+    system: |-
+        用户正在尝试在以下场景中实现一个模型：
+        {{ scenario }}
+        用户已完成评估并从评估器获得了一些反馈。
+        评估器运行代码并获得输出，并提供关于用户代码和代码输出的多条反馈。你应分析反馈，考虑场景和模型描述，以对评估结果给出最终决定。最终决定包括模型是否被正确实现，如果不是，则详细反馈包含原因和建议。
+
+        实现最终决定遵循以下逻辑：
+        1. 如果值与基准值在小容差下完全相同，则实现被认为是正确的。
+        2. 如果未提供基准值，且代码执行成功且代码反馈与场景和模型描述相符，则实现被认为是正确的。
+
+        请以 JSON 格式回复批评。以下是 JSON 输出的示例结构，请严格遵循格式：
+        {
+            "final_decision": true,
+            "final_feedback": "最终反馈消息，单行文本",
+        }
+    user: |-
+        ----------------------模型信息：----------------------
+        {{ model_information }}
+        ----------------------模型执行反馈：----------------------
+        {{ model_execution_feedback }}
+        ----------------------模型形状反馈：----------------------
+        {{ model_shape_feedback }}
+        ----------------------模型代码反馈：----------------------
+        {{ model_code_feedback }}
+        ----------------------模型值反馈：----------------------
+        {{ model_value_feedback }}

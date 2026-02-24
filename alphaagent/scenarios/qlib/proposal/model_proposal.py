@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import List, Tuple
 
@@ -9,8 +10,8 @@ from alphaagent.components.proposal import ModelHypothesis2Experiment, ModelHypo
 from alphaagent.core.prompts import Prompts
 from alphaagent.core.proposal import Hypothesis, Scenario, Trace
 from alphaagent.scenarios.qlib.experiment.model_experiment import QlibModelExperiment
-
-prompt_dict = Prompts(file_path=Path(__file__).parent.parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+prompt_dict = Prompts(file_path=Path(__file__).parent.parent / f"prompts_{language}.yaml")
 
 QlibModelHypothesis = Hypothesis
 

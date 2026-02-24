@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import re
 from jinja2 import Environment, StrictUndefined
@@ -22,7 +23,8 @@ from alphaagent.core.utils import multiprocessing_wrapper
 from alphaagent.core.conf import RD_AGENT_SETTINGS
 
 code_template = CodeTemplate(template_path=Path(__file__).parent / "template.jinjia2")
-implement_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+implement_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 class FactorMultiProcessEvolvingStrategy(MultiProcessEvolvingStrategy):
     def __init__(self, *args, **kwargs) -> None:
@@ -194,7 +196,7 @@ class FactorMultiProcessEvolvingStrategy(MultiProcessEvolvingStrategy):
 
 
 
-alphaagent_implement_prompts = Prompts(file_path=Path(__file__).parent / "prompts_alphaagent.yaml")
+alphaagent_implement_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_alphaagent_{language}.yaml")
 class FactorParsingStrategy(MultiProcessEvolvingStrategy):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

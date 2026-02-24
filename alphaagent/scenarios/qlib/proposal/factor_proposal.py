@@ -17,7 +17,8 @@ from alphaagent.log import logger
 from alphaagent.scenarios.qlib.regulator.factor_regulator import FactorRegulator
 
 QlibFactorHypothesis = Hypothesis
-alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_alphaagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_alphaagent_{language}.yaml")
 
 class AlphaAgentHypothesis(Hypothesis):
     """
@@ -51,7 +52,7 @@ class AlphaAgentHypothesis(Hypothesis):
                 concise Specification: {self.concise_specification}
                 """
 
-rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent.parent / "prompts_rdagent.yaml")
+rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent.parent / f"prompts_rdagent_{language}.yaml")
 
 class QlibFactorHypothesisGen(FactorHypothesisGen):
     def __init__(self, scen: Scenario) -> Tuple[dict, bool]:
@@ -159,7 +160,7 @@ class QlibFactorHypothesis2Experiment(FactorHypothesis2Experiment):
 
 
 
-alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent.parent / "prompts_alphaagent.yaml")
+alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent.parent / f"prompts_alphaagent_{language}.yaml")
 
 # prompt_dict不能作为属性，因为后续整个类的实例要被转为pickle，而prompt_dict不能转
 class AlphaAgentHypothesisGen(FactorHypothesisGen):

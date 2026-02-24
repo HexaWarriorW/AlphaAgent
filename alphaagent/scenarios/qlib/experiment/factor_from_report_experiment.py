@@ -1,4 +1,5 @@
 from copy import deepcopy
+import os
 from pathlib import Path
 
 from alphaagent.components.coder.factor_coder.factor import (
@@ -11,7 +12,8 @@ from alphaagent.core.scenario import Scenario
 from alphaagent.scenarios.qlib.experiment.factor_experiment import QlibFactorScenario
 from alphaagent.scenarios.qlib.experiment.workspace import QlibFBWorkspace
 
-prompt_dict = Prompts(file_path=Path(__file__).parent / "prompts_rdagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_rdagent_{language}.yaml")
 
 
 class QlibFactorFromReportScenario(QlibFactorScenario):

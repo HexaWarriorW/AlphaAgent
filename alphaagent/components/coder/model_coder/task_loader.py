@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 
@@ -14,7 +15,8 @@ from alphaagent.log import logger
 from alphaagent.oai.llm_utils import APIBackend
 from alphaagent.scenarios.qlib.experiment.model_experiment import QlibModelExperiment
 
-document_process_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+language = os.getenv("LANGUAGE", "cn")
+document_process_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 
 def extract_model_from_doc(doc_content: str) -> dict:

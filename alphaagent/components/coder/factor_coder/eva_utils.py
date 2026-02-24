@@ -1,6 +1,7 @@
 import io
 import json
 from abc import abstractmethod
+import os
 from pathlib import Path
 from typing import Tuple
 
@@ -13,9 +14,9 @@ from alphaagent.core.experiment import Task, Workspace
 from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_conf import LLM_SETTINGS
 from alphaagent.oai.llm_utils import APIBackend
-
-evaluate_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
-alphaagent_evaluate_prompts = Prompts(file_path=Path(__file__).parent / "prompts_alphaagent.yaml")
+language = os.getenv("LANGUAGE", "cn")
+evaluate_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
+alphaagent_evaluate_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_alphaagent_{language}.yaml")
 
 
 class FactorEvaluator:

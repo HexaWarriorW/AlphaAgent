@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -34,9 +35,10 @@ from alphaagent.core.evolving_framework import (
 )
 from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_utils import APIBackend
+language = os.getenv("LANGUAGE", "cn")
 
 py_parser = Parser(Language(tree_sitter_python.language()))
-CI_prompts = Prompts(file_path=Path(__file__).parent / "prompts.yaml")
+CI_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 
 @dataclass
