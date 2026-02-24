@@ -29,7 +29,7 @@ from alphaagent.scenarios.qlib.factor_experiment_loader.json_loader import (
     FactorExperimentLoaderFromDict,
 )
 
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 document_process_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 

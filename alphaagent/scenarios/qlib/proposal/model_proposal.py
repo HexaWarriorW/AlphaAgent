@@ -10,7 +10,7 @@ from alphaagent.components.proposal import ModelHypothesis2Experiment, ModelHypo
 from alphaagent.core.prompts import Prompts
 from alphaagent.core.proposal import Hypothesis, Scenario, Trace
 from alphaagent.scenarios.qlib.experiment.model_experiment import QlibModelExperiment
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 prompt_dict = Prompts(file_path=Path(__file__).parent.parent / f"prompts_{language}.yaml")
 
 QlibModelHypothesis = Hypothesis

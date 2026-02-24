@@ -23,7 +23,7 @@ from alphaagent.core.utils import multiprocessing_wrapper
 from alphaagent.core.conf import RD_AGENT_SETTINGS
 
 code_template = CodeTemplate(template_path=Path(__file__).parent / "template.jinjia2")
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 implement_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 class FactorMultiProcessEvolvingStrategy(MultiProcessEvolvingStrategy):

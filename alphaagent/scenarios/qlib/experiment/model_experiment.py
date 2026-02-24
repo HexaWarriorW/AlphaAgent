@@ -12,7 +12,7 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.core.scenario import Scenario
 from alphaagent.scenarios.qlib.experiment.workspace import QlibFBWorkspace
 
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 rdagent_prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_rdagent_{language}.yaml")
 
 

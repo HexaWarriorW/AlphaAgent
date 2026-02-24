@@ -14,7 +14,7 @@ from alphaagent.core.experiment import Task, Workspace
 from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_conf import LLM_SETTINGS
 from alphaagent.oai.llm_utils import APIBackend
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 evaluate_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 alphaagent_evaluate_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_alphaagent_{language}.yaml")
 

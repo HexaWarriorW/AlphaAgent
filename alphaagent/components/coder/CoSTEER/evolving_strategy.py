@@ -18,7 +18,7 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.core.scenario import Task
 from alphaagent.core.utils import multiprocessing_wrapper
 
-language = os.getenv("LANGUAGE", "cn")    
+language = os.getenv("AGENTLANGUAGE", "cn")    
 implement_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 

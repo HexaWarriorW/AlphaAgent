@@ -218,7 +218,7 @@ class CoSTEERQueriedKnowledgeV2(CoSTEERQueriedKnowledgeV1):
 
 
 class CoSTEERRAGStrategyV2(RAGStrategy):
-    language = os.getenv("LANGUAGE", "cn")
+    language = os.getenv("AGENTLANGUAGE", "cn")
     prompt = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
     def __init__(self, knowledgebase: CoSTEERKnowledgeBaseV2, settings: CoSTEERSettings) -> None:

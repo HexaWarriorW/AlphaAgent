@@ -15,7 +15,7 @@ from alphaagent.log import logger
 from alphaagent.oai.llm_utils import APIBackend
 from alphaagent.scenarios.qlib.experiment.model_experiment import QlibModelExperiment
 
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 document_process_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 

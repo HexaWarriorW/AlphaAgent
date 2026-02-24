@@ -16,7 +16,7 @@ from alphaagent.core.proposal import (
 )
 from alphaagent.oai.llm_utils import APIBackend
 
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
 
 

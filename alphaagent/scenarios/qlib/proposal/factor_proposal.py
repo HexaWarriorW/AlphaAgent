@@ -17,7 +17,7 @@ from alphaagent.log import logger
 from alphaagent.scenarios.qlib.regulator.factor_regulator import FactorRegulator
 
 QlibFactorHypothesis = Hypothesis
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 alphaagent_prompt_dict = Prompts(file_path=Path(__file__).parent / f"prompts_alphaagent_{language}.yaml")
 
 class AlphaAgentHypothesis(Hypothesis):

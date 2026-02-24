@@ -10,7 +10,7 @@ from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_utils import APIBackend
 
 DIRNAME = Path(__file__).absolute().resolve().parent
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 
 
 class ModelCodeWriter(Developer[ModelExperiment]):

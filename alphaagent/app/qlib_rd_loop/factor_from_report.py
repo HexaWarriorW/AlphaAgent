@@ -23,7 +23,7 @@ from alphaagent.scenarios.qlib.factor_experiment_loader.pdf_loader import (
 )
 from alphaagent.utils.workflow import LoopMeta
 
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 prompts_path = Path(__file__).parent / f"prompts_{language}.yaml"
 prompts = Prompts(file_path=prompts_path)
 

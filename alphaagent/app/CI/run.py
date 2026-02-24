@@ -35,7 +35,7 @@ from alphaagent.core.evolving_framework import (
 )
 from alphaagent.core.prompts import Prompts
 from alphaagent.oai.llm_utils import APIBackend
-language = os.getenv("LANGUAGE", "cn")
+language = os.getenv("AGENTLANGUAGE", "cn")
 
 py_parser = Parser(Language(tree_sitter_python.language()))
 CI_prompts = Prompts(file_path=Path(__file__).parent / f"prompts_{language}.yaml")
