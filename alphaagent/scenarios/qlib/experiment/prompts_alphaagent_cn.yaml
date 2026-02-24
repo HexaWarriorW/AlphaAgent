@@ -1,0 +1,239 @@
+qlib_factor_background: |-
+  因子是量化投资中使用的特征或变量，可帮助解释投资组合或单个资产的收益和风险。投资者使用因子来识别和利用超额收益来源，因子是许多量化投资策略的核心。
+  因子中的每个数字代表某一天某个工具的物理值。
+  用户将训练一个模型，基于前几天的因子值预测接下来几天的收益。
+  因子定义包括以下部分：
+  1. 名称：因子的名称。
+  2. 描述：因子的描述。
+  3. 公式：因子的公式。
+  4. 表达式：因子的可执行表达式。
+  5. 变量：公式中使用的变量或函数。
+  由于某些部分可能不适用，因子可能不会提供上述所有信息。
+  请特别给出因子中的所有超参数，如窗口大小、回看期等。一个因子应静态定义一个输出，数据源固定。例如，过去 10 天动量和过去 20 天动量应为两个不同的因子。
+
+qlib_factor_interface: |-
+  你的因子表达式应遵循接口规范，以便更好地与用户系统交互。
+  你的表达式必须至少包含一个变量（如 `$open`）。其他部分包含算术运算符（`+, -, *, /`）、逻辑运算符（`&&, ||`）、函数（`DELAY(), EXP()`）和条件语句（`A?B:C`）。
+  用户将你的表达式写入 Python 模板并直接以 "python {your_file_name}.py" 执行文件。因子值将保存到与你的 Python 文件同目录下名为 "result.h5" 的 HDF5 (H5) 文件中。结果文件是一个 HDF5 文件，包含 pandas 数据框。数据框的索引为 "datetime" 和 "instrument"，单列名为因子名，值为因子值。结果文件应保存在与你的 Python 文件相同的目录中。
+
+qlib_factor_strategy: |-
+  确保对每一步数据处理，数据格式（包括索引）通过注释清晰说明。
+  每个转换或计算应附有详细描述，说明数据如何结构化，特别强调关键方面，如数据是否具有多级索引、如何访问特定列或索引级别，以及影响数据形状的任何操作（如 `reset_index()`、`groupby()`、`merge()`）。
+  这种逐步说明将确保数据处理的清晰性和精确性。例如：
+  1. **从多级索引开始**：  
+    ```python
+    # 初始数据框具有多级索引，包含 'datetime' 和 'instrument'。
+    # 要访问 'datetime' 索引，使用 df.index.get_level_values('datetime')。
+    datetime_values = df.index.get_level_values('datetime')
+    ```
+ 
+  2. **必要时重置索引**：  
+    ```python
+    # 重置索引以将 'datetime' 和 'instrument' 从索引移至列。
+    # 此操作展平多级索引结构。
+    df = df.reset_index()
+    ```
+ 
+  3. **执行 groupby 操作**：  
+    ```python
+    # 按 'datetime' 和 'instrument' 分组聚合数据。
+    # groupby 后，结果将保持 'datetime' 和 'instrument' 为多级索引。
+    df_grouped = df.groupby(['datetime', 'instrument']).sum()
+    ```
+ 
+  4. **确保一致的日期时间格式**：  
+    ```python
+    # 合并前，确保两个数据框中的 'datetime' 列格式相同。
+    # 必要时转换为日期时间格式。
+    df['datetime'] = pd.to_datetime(df['datetime'])
+    other_df['datetime'] = pd.to_datetime(other_df['datetime'])
+    ```
+ 
+  5. **合并操作**：  
+    ```python
+    # 合并数据框时，确保按 'datetime' 和 'instrument' 合并。
+    # 如果这些是索引的一部分，合并前重置索引。
+    merged_df = pd.merge(df, other_df, on=['datetime', 'instrument'], how='inner')
+    ```
+
+qlib_factor_output_format: |-
+  你的输出应为类似以下示例信息的 pandas 数据框：
+  <class 'pandas.core.frame.DataFrame'>
+  MultiIndex: 40914 entries, (Timestamp('2020-01-02 00:00:00'), 'SH600000') to (Timestamp('2021-12-31 00:00:00'), 'SZ300059')
+  Data columns (total 1 columns):
+  #   Column            Non-Null Count  Dtype  
+  ---  ------            --------------  -----  
+  0   your factor name  40914 non-null  float64
+  dtypes: float64(1)
+  memory usage: <ignore>
+  注意：非空计数可以与总条目数不同，因为某些工具在某些天可能没有因子值。
+  `result.h5` 的一个可能格式如下：
+  datetime    instrument
+  2020-01-02  SZ000001     -0.001796
+              SZ000166      0.005780
+              SZ000686      0.004228
+              SZ000712      0.001298
+              SZ000728      0.005330
+                              ...
+  2021-12-31  SZ000750      0.000000
+              SZ000776      0.002459
+
+qlib_factor_simulator: |-
+  因子将发送到 Qlib，用于训练模型以基于前几天的因子值预测接下来几天的收益。
+  Qlib 是一个面向 AI 的量化投资平台，旨在通过在量化投资中应用 AI 技术来实现潜力、赋能研究并创造价值，从探索思想到实施生产。Qlib 支持多种机器学习建模范式，包括监督学习、市场动态建模和强化学习。
+  用户将使用 Qlib 自动执行以下操作：
+  1. 基于因子值生成新的因子表。
+  2. 训练模型如 LightGBM、CatBoost、LSTM 或简单的 PyTorch 模型，基于因子值预测接下来几天的收益。
+  3. 基于预测收益和策略构建投资组合。
+  4. 评估投资组合的表现，包括收益、夏普比率、最大回撤等。
+
+qlib_factor_rich_style_description : |-
+  ### R&D Agent-Qlib：自动化量化交易与迭代因子演化演示
+
+  #### [概述](#_summary)
+
+  该演示展示了假设生成、知识构建和决策过程的迭代过程。它强调了金融因子如何通过持续反馈和改进而演化。
+
+  #### [自动化 R&D](#_rdloops)
+
+  - **[R（研究）](#_research)**
+    - 思想和假设的迭代发展。
+    - 持续学习和知识构建。
+
+  - **[D（开发）](#_development)**
+    - 因子的渐进式实现和代码生成。
+    - 金融因子的自动化测试和验证。
+
+  #### [目标](#_summary)
+
+  通过 Qlib 平台展示金融因子的动态演化，强调每次迭代如何提高生成因子的准确性和可靠性。
+
+qlib_factor_from_report_rich_style_description : |-
+  ### R&D Agent-Qlib：自动化量化交易与从财务报告提取因子演示
+
+  #### [概述](#_summary)
+
+  该演示展示了从金融研究报告中提取因子、实现这些因子并通过 Qlib 回测分析其性能、持续扩展和完善因子库的过程。
+
+  #### [自动化 R&D](#_rdloops)
+
+  - **[R（研究）](#_research)**
+    - 从财务报告中迭代发展思想和假设。
+    - 持续学习和知识构建。
+
+  - **[D（开发）](#_development)**
+    - 因子的渐进式提取和代码生成。
+    - 金融因子的自动化实现和测试。
+
+  #### [目标](#_summary)
+
+  <table border="1" style="width:100%; border-collapse: collapse;">
+    <tr>
+      <td>💡 <strong>创新</strong></td>
+      <td>快速从研究报告中提取和测试因子的工具。</td>
+    </tr>
+    <tr>
+      <td>⚡ <strong>效率</strong></td>
+      <td>从大量报告中快速识别有价值的因子。</td>
+    </tr>
+    <tr>
+      <td>🗃️ <strong>输出</strong></td>
+      <td>扩展和完善因子库以支持进一步研究。</td>
+    </tr>
+  </table>
+
+qlib_factor_experiment_setting: |-
+  | 数据集 📊 | 模型 🤖    | 因子 🌟       | 数据划分 🧮                                   |
+  |---------|----------|---------------|-------------------------------------------------|
+  | CSI300  | LGBModel | Alpha158 Plus | 训练集：2012-01-01 至 2018-12-31 <br> 验证集：2019-01-01 至 2020-12-31 <br> 测试集：2021-01-01 至 2024-12-01 |
+
+
+qlib_model_background: |-
+  模型是量化投资中使用的机器学习或深度学习结构，用于预测投资组合或单个资产的收益和风险。投资者使用模型基于历史数据和已识别因子生成预测，这是许多量化投资策略的核心。
+  每个模型以因子为输入并预测未来收益。通常，模型越大，性能越好。
+  模型定义包括以下部分：
+  1. 名称：模型的名称。
+  2. 描述：模型的描述。
+  3. 架构：模型的详细架构，如神经网络层或树结构。
+  4. 超参数：模型中使用的超参数，如学习率、样本数等。
+  5. 模型类型：模型的类型，"Tabular" 表示表格模型，"TimeSeries" 表示时间序列模型。
+  模型应提供清晰详细的架构和超参数文档。一个模型应静态定义一个输出，具有固定的架构和超参数。例如，具有两个 GRU 层的模型和具有三个 GRU 层的模型应被视为两个不同的模型。
+
+qlib_model_interface: |-
+  你的 Python 代码应遵循接口规范，以便更好地与用户系统交互。
+  你的代码应包含多个部分：
+  1. 导入部分：导入必要的库。
+  2. 一个类，它是 pytorch.nn.Module 的子类。该类应有一个 init 函数和一个 forward 函数，输入张量并输出张量。
+  3. 设置一个名为 "model_cls" 的变量为你定义的类。
+
+  用户将你的代码保存到一个名为 "model.py" 的 Python 文件中。然后用户在设置 cwd 到目录后从 "model.py" 导入 model_cls：
+  ```python
+  from model import model_cls
+  ```
+  因此你的 Python 代码应遵循以下模式：
+  ```python
+  class XXXModel(torch.nn.Module):
+      ...
+  model_cls = XXXModel
+  ```
+
+  模型有两种类型，"Tabular" 表示表格模型，"TimeSeries" 表示时间序列模型。表格模型的输入形状为 (batch_size, num_features)，时间序列模型的输入形状为 (batch_size, num_features, num_timesteps)。模型的输出形状应为 (batch_size, 1)。
+  "batch_size" 是由 forward 函数的输入确定的动态值。
+  "num_features" 和 "num_timesteps" 是静态的，将通过 init 函数提供给模型。
+  用户将使用以下代码初始化表格模型：
+  ```python
+  model = model_cls(num_features=num_features)
+  ```
+  用户将使用以下代码初始化时间序列模型：
+  ```python
+  model = model_cls(num_features=num_features, num_timesteps=num_timesteps)
+  ```
+  没有其他参数会传递给模型，所以给其他参数一个默认值或者让它们保持静态。
+
+  处理时间序列模型时，记得排列输入张量，因为输入张量的形状为 (batch_size, num_features, num_timesteps)，而正常的时间序列模型期望的输入张量形状为 (batch_size, num_timesteps, num_features)。
+
+  不要在你的 Python 代码中写任何 try-except 块。用户将捕获异常信息并向你提供反馈。也不要在你的 Python 代码中写主函数。用户将在 model_cls 中调用 forward 方法来获取输出张量。
+
+  请注意，你的模型应仅使用当前特征作为输入。用户将向模型的 forward 函数提供输入张量。
+
+
+qlib_model_output_format: |-
+  你的输出应为形状为 (batch_size, 1) 的张量。
+  输出张量应保存在与你的 Python 文件同目录下名为 "output.pth" 的文件中。
+  用户将评估输出张量的形状，所以从 "output.pth" 读取的张量应为 8 个数字。
+
+qlib_model_simulator: |-
+  模型将发送到 Qlib，以训练和评估它们在预测未来收益方面的性能。基于结果反馈改进假设。
+  Qlib 是一个面向 AI 的量化投资平台，旨在通过在量化投资中应用 AI 技术来实现潜力、赋能研究并创造价值，从探索思想到实施生产。Qlib 支持多种机器学习建模范式，包括监督学习、市场动态建模和强化学习（RL）。
+  用户将使用 Qlib 自动执行以下任务：
+  1. 生成基线因子表。
+  2. 训练你定义的类中的模型以基于因子值预测接下来几天的收益。
+  3. 基于预测收益使用特定策略构建投资组合。
+  4. 评估投资组合的性能，包括收益、夏普比率、最大回撤等指标。
+  5. 基于性能评估和反馈迭代增长假设以实现模型改进。
+
+qlib_model_rich_style_description: |-
+  ### Qlib 模型演化自动 R&D 演示
+  
+  #### [概述](#_summary)
+  
+  该演示展示了量化金融中模型构建的假设生成、知识构建和决策过程的迭代过程。它强调了模型如何通过持续反馈和改进而演化。
+  
+  #### [自动化 R&D](#_rdloops)
+  
+  - **[R（研究）](#_research)**
+    - 思想和假设的迭代。
+    - 持续学习和知识构建。
+  
+  - **[D（开发）](#_development)**
+    - 模型的演化代码生成和改进。
+    - 模型的自动化实现和测试。
+  
+  #### [目标](#_summary)
+  
+  通过 Qlib 平台展示模型的动态演化，强调每次迭代如何提高生成模型的准确性和可靠性。 
+
+qlib_model_experiment_setting: |-
+  | 数据集 📊 | 模型 🤖    | 因子 🌟       | 数据划分 🧮                                   |
+  |---------|----------|---------------|-------------------------------------------------|
+  | CSI300  | RDAgent-dev | 20 个因子（Alpha158）  | 训练集：2008-01-01 至 2014-12-31 <br> 验证集：2015-01-01 至 2016-12-31 <br> 测试集：2017-01-01 至 2020-08-01 |
