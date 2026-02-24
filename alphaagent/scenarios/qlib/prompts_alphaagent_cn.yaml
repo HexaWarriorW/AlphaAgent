@@ -1,0 +1,410 @@
+potential_direction_transformation: |-
+  这是第一轮，用户提供了一个潜在方向：“{{ potential_direction }}”。参考该方向，你需要将其转化为正式语言的假设，清晰且可执行，便于因子生成。请在表述假设时考虑以下方面：
+  1. **清晰性**：确保假设具体且不含歧义。
+  2. **可执行性**：假设应指向明确的实验或研究路径。
+  3. **相关性**：确保假设与用户提供的潜在方向直接相关。
+
+
+hypothesis_and_feedback: |-
+  {% for hypothesis, experiment, feedback in trace.hist[-10:] %}
+  假设 {{ loop.index }}：{{ hypothesis }}
+  对应代码（导致性能差异）：{{experiment.sub_workspace_list[0].code_dict.get("model.py")}}
+  基于该假设的结果观察：{{ feedback.observations }}
+  对原始假设的反馈：{{ feedback.hypothesis_evaluation }}
+  用于上下文的新反馈（供你同意或改进）：{{ feedback.new_hypothesis }}
+  新假设的理由：{{ feedback.reason }}
+  变更到该假设是否有效？（关注变化）：{{ feedback.decision }}
+  {% endfor %}
+
+hypothesis_output_format: |-
+  输出必须为 JSON 格式。不要在回复中添加任何其他文本。结构如下：
+  {
+  "hypothesis": "单行文本。基于提供信息生成的新假设。",
+  "concise_knowledge": "单行文本。基于理论原则的可迁移知识。使用条件语法，如：'如果……，……；当……，……；等等'。确保表达清晰无歧义。例如，避免说“先前的假设”，因为读者不知道指什么。",
+  "concise_observation": "单行文本。聚焦于给定情景、数据特征或以往经验（失败与成功）的观察。",
+  "concise_justification": "单行文本。基于理论原则或初始假设对该假设进行论证。",
+  "concise_specification": "单行文本。定义假设的范围、条件与约束。指定预期关系、变量与阈值，确保可检验且与观察数据相关。"
+    }
+
+
+factor_hypothesis_specification: |-
+  1. **数据驱动的假设形成：**  
+    - 将假设限定在可用数据范围内，以便顺利测试。
+    - 使假设与数据的时间、横截面与分布特性对齐。
+    - 避免过拟合，聚焦稳健、具经济直觉且创新的关系。 
+
+  2. **假设的论证：**  
+    - 基于观察到的市场模式，创造性推断潜在经济或行为驱动因素。
+    - 建立在经验证据之上，同时探索创新或未经测试的联系。
+    - 提出可执行的洞见，挑战传统假设但仍保持可检验性。
+    - 强调因子揭示独特、可预测市场行为的潜力。
+
+  3. **持续优化与探索：**  
+      - 通过不同变体测试迭代完善首个假设。 
+      - 将实证结果反馈融入改进因子预测能力。
+
+
+function_lib_description: |-
+  表达式中仅允许以下操作： 
+  ### **横截面函数**
+  - **RANK(A)**：A 在横截面维度的排名。
+  - **ZSCORE(A)**：A 在横截面维度的 Z 分数。
+  - **MEAN(A)**：A 在横截面维度的均值。
+  - **STD(A)**：A 在横截面维度的标准差。
+  - **SKEW(A)**：A 在横截面维度的偏度。
+  - **KURT(A)**：A 在横截面维度的峰度。
+  - **MAX(A)**：A 在横截面维度的最大值。
+  - **MIN(A)**：A 在横截面维度的最小值。
+  - **MEDIAN(A)**：A 在横截面维度的中位数
+
+  ### **时间序列函数**
+  - **DELTA(A, n)**：A 在 n 个周期内的变化量。
+  - **DELAY(A, n)**：A 延迟 n 期的值。
+  - **TS_MEAN(A, n)**：A 在过去 n 天的均值。
+  - **TS_SUM(A, n)**：A 在过去 n 天的总和。
+  - **TS_RANK(A, n)**：A 在过去 n 天中最后一个值的时间序列排名。
+  - **TS_ZSCORE(A, n)**：A 在过去 n 天的 Z 分数。
+  - **TS_MEDIAN(A, n)**：A 在过去 n 天的中位数。
+  - **TS_PCTCHANGE(A, p)**：A 在 p 期内的百分比变化。
+  - **TS_MIN(A, n)**：A 在过去 n 天的最小值。
+  - **TS_MAX(A, n)**：A 在过去 n 天的最大值。
+  - **TS_ARGMAX(A, n)**：A 在过去 n 天最大值相对当前时间的索引。
+  - **TS_ARGMIN(A, n)**：A 在过去 n 天最小值相对当前时间的索引。
+  - **TS_QUANTILE(A, p, q)**：A 在过去 p 期的滚动分位数，q 为 0 到 1 的分位值。
+  - **TS_STD(A, n)**：A 在过去 n 天的标准差。
+  - **TS_VAR(A, p)**：A 在过去 p 期的滚动方差。
+  - **TS_CORR(A, B, n)**：A 与 B 在过去 n 天的相关系数。
+  - **TS_COVARIANCE(A, B, n)**：A 与 B 在过去 n 天的协方差。
+  - **TS_MAD(A, n)**：A 在过去 n 天的滚动中位数绝对偏差。
+  - **PERCENTILE(A, q, p)**：A 的分位数，q 为 0 到 1 的分位值；若提供 p，则计算过去 p 期的滚动分位数。
+  - **HIGHDAY(A, n)**：过去 n 天内 A 达到最高值距今天的天数。
+  - **LOWDAY(A, n)**：过去 n 天内 A 达到最低值距今天的天数。
+  - **SUMAC(A, n)**：A 在过去 n 天的累计和。
+
+  ### **移动平均与平滑函数**
+  - **SMA(A, n, m)**：A 的 n 期简单移动平均，带修正参数 m。
+  - **WMA(A, n)**：A 的 n 期加权移动平均，权重从 0.9 递减至 0.9^(n)。
+  - **EMA(A, n)**：A 的 n 期指数移动平均，衰减因子为 2/(n+1)。
+  - **DECAYLINEAR(A, d)**：A 的 d 期线性加权移动平均，权重从 1 递增至 d。
+
+  ### **数学运算**
+  - **PROD(A, n)**：A 在过去 n 天的乘积。一般乘法用 `*`。
+  - **LOG(A)**：A 的自然对数。
+  - **SQRT(A)**：A 的平方根。
+  - **POW(A, n)**：A 的 n 次幂。
+  - **SIGN(A)**：A 的符号，取 1、0 或 -1。
+  - **EXP(A)**：A 的指数。
+  - **ABS(A)**：A 的绝对值。
+  - **MAX(A, B)**：A 与 B 的最大值。
+  - **MIN(A, B)**：A 与 B 的最小值。
+  - **INV(A)**：A 的倒数（1/x）。
+  - **FLOOR(A)**：A 向下取整。
+  
+  ### **条件与逻辑函数**
+  - **COUNT(C, n)**：过去 n 期中满足条件 C 的样本数。C 为逻辑表达式，如 `$close > $open`。
+  - **SUMIF(A, n, C)**：过去 n 期中满足条件 C 的 A 的和。C 为逻辑表达式。
+  - **FILTER(A, C)**：按条件 C 过滤多列序列 A。C 为与 A 同尺寸的逻辑表达式。
+  - **(C1)&&(C2)**：逻辑“与”。C1 与 C2 为逻辑表达式，如 A > B。
+  - **(C1)||(C2)**：逻辑“或”。C1 与 C2 为逻辑表达式，如 A > B。
+  - **(C1)?(A):(B)**：条件判断：若 C1 成立则为 A，否则为 B。C1 为逻辑表达式，如 A > B。
+
+  ### **回归与残差函数**
+  - **SEQUENCE(n)**：长度为 n 的单列序列，从 1 到 n。`SEQUENCE()` 必须作为 `REGBETA()` 或 `REGRESI()` 的参数 B 嵌套使用。
+  - **REGBETA(A, B, n)**：用过去 n 个样本对 A 关于 B 的回归系数，A 必须为多列序列，B 为单列或多列序列。
+  - **REGRESI(A, B, n)**：用过去 n 个样本对 A 关于 B 的回归残差，A 必须为多列序列，B 为单列或多列序列。
+
+  ### **技术指标**
+  - **RSI(A, n)**：A 的 n 期相对强弱指数。通过比较近期涨跌幅度衡量动量。
+  - **MACD(A, short_window, long_window)**：A 的 MACD，为短期与长期指数移动平均之差。
+  - **BB_MIDDLE(A, n)**：布林带中轨，为 A 的 n 期简单移动平均。
+  - **BB_UPPER(A, n)**：布林带上轨，为中轨加上 A 的 n 期两倍标准差。
+  - **BB_LOWER(A, n)**：布林带下轨，为中轨减去 A 的 n 期两倍标准差。
+
+
+  注意：
+  - 仅允许使用数据中提供的变量（如 `$open`）、算术运算符（`+, -, *, /`）、逻辑运算符（`&&, ||`）以及上述操作。
+  - 确保因子表达式至少包含一个数据列变量（如 `$open`），并结合以上注册操作。不要使用未声明变量（如 'n', 'w_1'）或未定义符号（如 '='）。
+  - 注意区分带 TS 前缀的操作（如 `TS_STD()`）与不带前缀的操作（如 `STD()`）。 
+
+
+factor_experiment_output_format: |-
+  不要使用任何未声明变量。因子表达式必须严格基于函数库（如 `RANK(.)`）及数据中提供的变量（如 `$open`）。
+  输出必须为 JSON 格格式，且不包含其他内容。结构如下：
+  {
+      "factor name 1": {
+          "description": "因子 1 的描述",
+          "variables": {
+              "变量或函数名 1": "变量或函数 1 的描述",
+              "变量或函数名 2": "变量或函数 2 的描述"
+          }
+          "formulation": "因子 1 的 LaTeX 公式",
+          "expression": "因子 1 的表达式，基于所提及函数与变量",
+      },
+      "factor name 2": {
+          "description": "因子 2 的描述",
+          "variables": {
+              "变量或函数名 1": "变量或函数 1 的描述",
+              "变量或函数名 2": "变量或函数 2 的描述"
+          }
+          "formulation": "因子 2 的 LaTeX 公式",
+          "expression": "因子 2 的表达式，基于所提及函数与变量",
+      }
+      # 不要在此添加省略号 (...) 或任何可能导致 JSON 解析错误的占位文本！
+  }
+
+  示例：
+  {
+      "Normalized_Intraday_Range_Factor_10D": {
+          "description": "该因子融合蜡烛图运动模式与市场波动性，以提高对短期价格变动的预测准确性。该因子计算蜡烛实体大小与 10 日收盘价标准差之间的归一化差异。",
+          "variables": {
+              "$close": "当日收盘价。",
+              "$open": "当日开盘价。",
+              "ABS(A)": "A 的绝对值。",
+              "TS_STD(A, n)": "A 在过去 n 天的标准差。"
+          }
+          "formulation": "NIR_\\text{10D} = \\frac{\\text{ABS}(\\text{close} - \\text{open})}{\\text{STD}(\\text{close}, 10)}",
+          "expression": "ABS($close - $open) / (TS_STD($close, 10) + 1e-8)",
+      },
+      "Volume_Range_Correlation_Factor_20D": {
+          "description": "该因子衡量蜡烛区间（最高 - 最低）与成交量在 20 日窗口内的相关性，旨在捕捉价格区间与市场参与度的关系。",
+          "variables": {
+              "$high": "当日最高价。",
+              "$low": "当日最低价。",
+              "$volume": "当日成交量。",
+              "TS_CORR(A, B, n)": "A 与 B 在过去 n 天的相关系数。"
+          }
+          "formulation": "VRC_\\text{20D} = \\text{TS_CORR}(\\text{high} - \\text{low}, \\text{volume}, 20)",
+          "expression": "TS_CORR($high - $low, $volume, 20)",
+      }
+  }
+
+factor_feedback_generation:
+  system: |-
+    请理解以下操作逻辑，然后给出适合该场景的反馈：
+
+    {{ scenario }}
+
+    你将收到一个假设、多个任务及其因子、结果，以及 SOTA 结果。
+    你的反馈应说明当前结果是否支持或反驳该假设，与先前 SOTA（State of the Art）结果对比，并提出改进或新方向建议。
+    请理解以下操作逻辑，然后给出适合该场景的反馈：
+      1. 逻辑说明：
+          - 每个假设代表一个可通过多次迭代改进的理论框架
+          - 重点在同一理论框架内探索不同实现方式
+          - 在考虑方向变更前，持续优化因子构造方法
+      
+      2. 发展方向：
+          - 假设精炼：
+              - 提出因子构造方法的具体改进建议
+              - 提出同一理论概念的替代数学表达
+              - 识别参数选择与组合方式的潜在变体
+          
+          - 因子增强：
+              - 通过参数或结构优化微调现有因子
+              - 探索不同的归一化与标准化方法
+              - 考虑替代窗口长度与加权方案
+          
+          - 方法迭代：
+              - 在保持核心概念的前提下优化数学表达
+              - 建议同一理论框架内的互补信号
+              - 提出当前方法论的稳健变体
+      
+      3. 最终目标：
+          - 最终目标是持续挖掘在每次迭代中超越前一版本的因子，保持最佳 SOTA。
+    
+      在分析结果时：
+      1. **因子构造分析：**
+          - 评估不同构造方法如何影响因子性能
+          - 识别构造过程中对性能贡献最大的部分
+          - 提出提升因子稳健性的具体修改建议
+      
+      2. **参数敏感性：**
+          - 分析不同参数选择的影响
+          - 推荐进一步探索的参数范围
+          - 识别因子构造过程中的关键组件
+
+    关注持续精炼：
+      - 在当前理论框架内穷尽所有可能变体
+      - 记录不同实现方式的有效性
+      
+    请提供详细且建设性的反馈，以供后续探索。
+    以 JSON 格式回复。结果分析的 JSON 示例结构：
+    {
+      "Observations": "整体观察",
+      "Feedback for Hypothesis": "与假设相关的观察",
+      "New Hypothesis": "你的新假设",
+      "Reasoning": "新假设的理由",
+      "Replace Best Result": "yes 或 no"
+    }
+  user: |-
+    目标假设： 
+    {{ hypothesis_text }}
+    任务与因子：
+    {% for task in task_details %}
+      - {{ task.factor_name }}：{{ task.factor_description }}
+        - 因子公式：{{ task.factor_formulation }}
+        - 变量：{{ task.variables }}
+        - 因子实现：{{ task.factor_implementation }}
+        {% if task.factor_implementation == "False" %}
+        **注意：该因子未在当前实验中实现。只有已实现因子的假设才能在本次运行中验证。**
+        {% endif %}
+    {% endfor %}
+    综合结果： 
+    {{ combined_result }}
+    
+    在以下方面分析综合结果：
+    1. 支持或反驳假设。
+    2. 与 SOTA 实验相比表现是改进还是退化。
+
+    评估指标说明：
+    以下是各指标的金融含义，应据此判断结果：
+
+    - 1day.excess_return_without_cost.max_drawdown：不考虑交易成本的最大回撤（越小越好）
+    - 1day.excess_return_without_cost.information_ratio：不考虑交易成本的超额收益风险比（越大越好）
+    - 1day.excess_return_without_cost.annualized_return：不考虑交易成本的年化收益（越大越好）
+    - IC：预测收益（\hat{y}）与实际收益（y）的相关性，使用皮尔逊相关（越大越好）
+
+    判断结果时：
+      1. **替换建议：**
+        - 若新因子在不计交易成本的年化收益上显著提升，建议替换当前最佳结果。
+        - 若年化收益与任一其他指标优于 SOTA，也建议替换。
+        - 只要年化收益提升，其他指标的小幅波动可接受。
+
+    注意：只有“因子实现”为 True 的因子在本次实验中被实现与测试。若为 False，则该因子的假设无法在本次运行中验证。
+
+
+hypothesis_gen:
+  system_prompt: |-
+    用户正在进行数据驱动的研发流程，以生成新的 {{targets}}。 
+    {{targets}} 将用于以下场景：
+    {{scenario}}
+    用户已提出若干假设并进行了评估，相关信息将提供给你。 
+    你的任务是检查是否已有生成的假设。若存在，请沿用或生成改进版本。
+    {% if hypothesis_specification %}
+    为帮助你形成新假设，用户提供了额外信息：
+    {{hypothesis_specification}}。
+    **重要：** 如果 hypothesis_specification 指明了你需要遵循的下一步，请务必遵循。
+    {% endif %}
+    请使用以下格式与规范生成输出。避免做出依赖于支持数据范围之外的假设。
+    {{ hypothesis_output_format }}
+
+  user_prompt: |-
+    {% if hypothesis_and_feedback|length == 0 %}这是第一轮假设生成，用户尚无该场景的假设。鼓励你提出显著不同于既有视角的创新假设。
+    {% elif hypothesis_and_feedback|length > 0 and round == 0 %}{{ hypothesis_and_feedback }}
+    {% else %}这不是第一轮，用户已在该场景下提出多个假设并进行了评估。
+    先前的假设及对应反馈如下（关注最后一个及其新假设与理由，判断是否同意）：
+    {{ hypothesis_and_feedback }}
+    {% endif %}
+    {% if RAG %}
+    为帮助你生成新的 {{targets}}，提供了如下信息：{{RAG}}。
+    **注意：** 所提供的 RAG 仅供参考。 
+    你必须审慎评估其是否与 {{targets}} 对齐。 
+    如不对齐，请勿使用。请自行判断。
+    {% endif %}
+    同时生成推理与精炼知识相关的键。对于这些键，尤其是知识部分，请结合具体场景进行说明，以构建该领域的特定知识，而非一般知识。
+
+hypothesis2experiment:
+  system_prompt: |-
+    用户希望基于上一步生成的假设来生成新的 {{targets}}。 
+    {{targets}} 将用于某一场景，场景如下：
+    {{ scenario }}
+
+    用户将使用生成的 {{targets}} 进行实验。用户会提供：
+    1. 目标假设（用于生成 {{targets}}）。
+    2. 先前生成的假设及对应反馈。
+    3. 相似假设下已提出的 {{targets}}。
+    4. 需要规避的重复子表达式（用于提升因子原创性与新颖性）。
+    5. 其他有助于生成新 {{targets}} 的信息。
+
+
+    1. **每次生成 2-3 个因子：**
+      - 每次生成 2-3 个因子。
+      - 在简洁与创新之间取得平衡，构建稳健的因子库。
+      - 每个因子彼此独立。请不要在因子表达式中引用其他因子。
+
+
+    2.**因子构造关键考虑：**
+      - **数据预处理与标准化：**
+          - 避免直接使用原始价格与成交量，因存在尺度差异
+          - 使用相对变化或标准化数据（如 RANK()、ZSCORE()）
+          - 将价格转换为收益，如 `(DELTA($close, 1)/$close)` 而非价格水平
+          - 将成交量转换为相对变化，如 `(DELTA($volume, 1)/$volume)`
+
+      - **时间序列处理：**
+          - 为需要历史数据的指标选择合适样本期
+          - 为移动平均 SMA()、EMA()、WMA() 选择合适窗口
+
+      - **归一化与稳定性：**
+          - 在分母添加小常数（如 1e-8）防止除零
+          - 使用 TS_ZSCORE() 标准化因子值
+          - 使用 SIGN() 减少极端值影响
+          - 使用 MAX(MIN(x, upper), lower) 截断取值
+
+      - **横截面处理：**
+          - 使用 RANK() 或 ZSCORE() 提升横截面可比性
+          - 使用 FILTER() 处理异常值
+          - 确保相关计算具有足够窗口长度
+
+      - **稳健性考虑：**
+          - 在多个时间窗口验证因子稳定性
+          - 使用 TS_MEDIAN() 替代 TS_MEAN() 以降低异常值影响
+          - 使用移动平均平滑高频波动
+  
+      - **灵活性考虑：**  
+          - 定义因子时应允许一定范围或灵活性，而非严格相等约束。
+          - 例如 `(TS_MIN($low, 10) == DELAY(TS_MIN($low, 10), 1))` 过于严格。 
+          - 可使用范围式方法，如：`(TS_MIN($low, 10) < DELAY(TS_MIN($low, 10), 1) + 1/10 * TS_STD($low, 20)) && (TS_MIN($low, 10) > DELAY(TS_MIN($low, 10), 1) - 1/10 * TS_STD($low, 20))`。
+
+      - **处理重复子表达式：**
+            - 若提供需规避的重复子表达式，确保新因子表达式使用替代计算
+            - 用语义相近但结构不同的表达替代重复模式
+            - 例如若 `ABS($close - $open)` 被标记为重复：
+                - 可使用 `($high - $low)` 表示价格区间
+                - 使用 `SIGN($close - $open) * ($close - $open)` 表示方向性幅度
+                - 探索如 `($high - $low) / ($open + $close)` 等其他价格差组合
+            - 在避免结构重复的同时保持因子可解释性
+            - 关注运算符与变量的独特组合以确保原创性
+
+    请按以下格式生成输出：
+    {{ experiment_output_format }}
+
+    严格遵守因子表达式语法要求；不要使用未声明变量（如 n）或函数。
+    
+  user_prompt: |-
+    用户在该场景下已提出若干假设并进行评估。
+    你需要生成 {{targets}} 的目标假设如下：
+    {{ target_hypothesis }}
+    
+    先前的假设及对应反馈如下：
+    {{ hypothesis_and_feedback }}
+
+    构建因子表达式时，仅允许使用以下日频变量：
+    - $open：当日开盘价。
+    - $close：当日收盘价。
+    - $high：当日最高价。
+    - $low：当日最低价。
+    - $volume：当日成交量。
+    - $return：当日收益。
+
+    因子表达式中允许的运算符与函数为： 
+    {{function_lib_description}}
+
+
+    {% if expression_duplication %}
+    **警告：检测到与之前因子表达式重复**
+    {{ expression_duplication }}
+
+    建议：
+    - 避免上述重复子表达式
+    - 通过独特组合数据变量与操作生成新颖因子
+    - 混合使用数学运算（如幂、对数变换）构造表达式，揭示不同关系与交互
+    - 使用变换后的变量增强表达力，如用 `$open`、`$close/TS_MEAN($close, 10)` 或 `($open + $close) / 2` 代替 `$close` 进行归一化或趋势调整。
+    {% endif %}
+
+    请基于以上信息，以 JSON 格式生成新的 {{targets}}。
+
+
+
+expression_duplication: |-
+  - 已提出表达式：{{ prev_expression }}
+  - 重复子表达式大小：{{ duplicated_subtree_size }}
+  - 重复子表达式：{{ duplicated_subtree }}
